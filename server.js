@@ -10,13 +10,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PUBLIC_URL = (process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 
-const DATA_FILE = path.join(__dirname, 'data', 'certificados.json');
+const DATA_FILE = path.join(__dirname, 'certificados.json');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
 function readCertificados() {
   try {
@@ -27,7 +26,11 @@ function readCertificados() {
 }
 
 function writeCertificados(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  fs.writeFileSync(
+    DATA_FILE,
+    JSON.stringify(data, null, 2),
+    'utf8'
+  );
 }
 
 function slugify(text = '') {
@@ -40,100 +43,323 @@ function slugify(text = '') {
 }
 
 function codigoCertificado() {
-  const y = new Date().getFullYear();
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return `CC-${y}-${random}`;
+  const year = new Date().getFullYear();
+  const random = crypto
+    .randomBytes(3)
+    .toString('hex')
+    .toUpperCase();
+
+  return `CC-${year}-${random}`;
 }
 
-app.get('/', (_, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+function publicUrl(req) {
+  const configured = String(
+    process.env.PUBLIC_URL || ''
+  )
+    .trim()
+    .replace(/\/$/, '');
 
-app.get('/api/certificados', (req, res) => {
-  const all = readCertificados();
-  const q = String(req.query.q || '').trim().toLowerCase();
+  if (configured) {
+    return configured;
+  }
 
-  if (!q) return res.json(all);
+  const proto =
+    req.headers['x-forwarded-proto'] ||
+    req.protocol;
 
-  res.json(
-    all.filter(x =>
-      [x.alumno, x.curso, x.profesor, x.director, x.codigo]
-        .some(v => String(v || '').toLowerCase().includes(q))
-    )
+  return `${proto}://${req.get('host')}`;
+}
+
+/* =========================
+   PANEL PRINCIPAL
+========================= */
+
+app.get('/', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, 'admin.html')
   );
 });
 
-app.post('/api/certificados', async (req, res) => {
-  const alumno = String(req.body.alumno || '').trim();
-  const curso = String(req.body.curso || '').trim();
-  const profesor = String(req.body.profesor || '').trim();
-  const director = String(req.body.director || '').trim();
-  const fecha = String(req.body.fecha || '').trim();
+/* =========================
+   LISTAR CERTIFICADOS
+========================= */
 
-  if (!alumno || !curso || !profesor || !director || !fecha) {
-    return res.status(400).json({ error: 'Faltan datos obligatorios.' });
+app.get('/api/certificados', (req, res) => {
+  const certificados = readCertificados();
+
+  const q = String(
+    req.query.q || ''
+  )
+    .trim()
+    .toLowerCase();
+
+  if (!q) {
+    return res.json(certificados);
   }
 
-  const all = readCertificados();
-  const id = crypto.randomUUID();
-  const codigo = codigoCertificado();
-  const verifyUrl = `${PUBLIC_URL}/verificar/${id}`;
-  const qr = await QRCode.toDataURL(verifyUrl, {
-    width: 700,
-    margin: 1,
-    errorCorrectionLevel: 'H'
-  });
+  const resultados =
+    certificados.filter(certificado => {
 
-  const item = {
-    id,
-    codigo,
-    alumno,
-    curso,
-    curso_slug: slugify(curso),
-    profesor,
-    director,
-    fecha,
-    qr,
-    created_at: new Date().toISOString()
-  };
+      const campos = [
+        certificado.alumno,
+        certificado.curso,
+        certificado.profesor,
+        certificado.director,
+        certificado.codigo
+      ];
 
-  all.unshift(item);
-  writeCertificados(all);
+      return campos.some(campo =>
+        String(campo || '')
+          .toLowerCase()
+          .includes(q)
+      );
+    });
 
-  res.json(item);
+  res.json(resultados);
 });
 
-app.delete('/api/certificados/:id', (req, res) => {
-  const all = readCertificados();
-  const next = all.filter(x => x.id !== req.params.id);
+/* =========================
+   CREAR CERTIFICADO
+========================= */
 
-  if (next.length === all.length) {
-    return res.status(404).json({ error: 'Certificado no encontrado.' });
+app.post(
+  '/api/certificados',
+  async (req, res) => {
+
+    try {
+
+      const alumno =
+        String(req.body.alumno || '').trim();
+
+      const curso =
+        String(req.body.curso || '').trim();
+
+      const profesor =
+        String(req.body.profesor || '').trim();
+
+      const director =
+        String(req.body.director || '').trim();
+
+      const fecha =
+        String(req.body.fecha || '').trim();
+
+      if (
+        !alumno ||
+        !curso ||
+        !profesor ||
+        !director ||
+        !fecha
+      ) {
+
+        return res.status(400).json({
+          error:
+            'Faltan datos obligatorios.'
+        });
+
+      }
+
+      const certificados =
+        readCertificados();
+
+      const id =
+        crypto.randomUUID();
+
+      const codigo =
+        codigoCertificado();
+
+      const verifyUrl =
+        `${publicUrl(req)}/verificar/${id}`;
+
+      const qr =
+        await QRCode.toDataURL(
+          verifyUrl,
+          {
+            width: 700,
+            margin: 1,
+            errorCorrectionLevel: 'H'
+          }
+        );
+
+      const certificado = {
+
+        id,
+        codigo,
+
+        alumno,
+        curso,
+
+        curso_slug:
+          slugify(curso),
+
+        profesor,
+        director,
+        fecha,
+
+        qr,
+
+        created_at:
+          new Date().toISOString()
+      };
+
+      certificados.unshift(
+        certificado
+      );
+
+      writeCertificados(
+        certificados
+      );
+
+      res.json(certificado);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          'No se pudo generar el certificado.'
+      });
+
+    }
   }
+);
 
-  writeCertificados(next);
-  res.json({ ok: true });
-});
+/* =========================
+   VER UN CERTIFICADO
+========================= */
 
-app.get('/api/certificados/:id', (req, res) => {
-  const item = readCertificados().find(x => x.id === req.params.id);
-  if (!item) return res.status(404).json({ error: 'Certificado no encontrado.' });
-  res.json(item);
-});
+app.get(
+  '/api/certificados/:id',
+  (req, res) => {
 
-app.get('/api/curso/:slug', (req, res) => {
-  const all = readCertificados().filter(x => x.curso_slug === req.params.slug);
-  res.json(all);
-});
+    const certificado =
+      readCertificados().find(
+        item =>
+          item.id === req.params.id
+      );
 
-app.get('/diploma/:id', (_, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'diploma.html'));
-});
+    if (!certificado) {
 
-app.get('/verificar/:id', (_, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'verificar.html'));
-});
+      return res
+        .status(404)
+        .json({
+          error:
+            'Certificado no encontrado.'
+        });
 
-app.listen(PORT, () => {
-  console.log(`Sistema de diplomas: http://localhost:${PORT}`);
-});
+    }
+
+    res.json(certificado);
+  }
+);
+
+/* =========================
+   ELIMINAR CERTIFICADO
+========================= */
+
+app.delete(
+  '/api/certificados/:id',
+  (req, res) => {
+
+    const certificados =
+      readCertificados();
+
+    const nuevos =
+      certificados.filter(
+        item =>
+          item.id !== req.params.id
+      );
+
+    if (
+      nuevos.length ===
+      certificados.length
+    ) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            'Certificado no encontrado.'
+        });
+
+    }
+
+    writeCertificados(nuevos);
+
+    res.json({
+      ok: true
+    });
+  }
+);
+
+/* =========================
+   EGRESADOS POR CURSO
+========================= */
+
+app.get(
+  '/api/curso/:slug',
+  (req, res) => {
+
+    const certificados =
+      readCertificados()
+        .filter(
+          item =>
+            item.curso_slug ===
+            req.params.slug
+        );
+
+    res.json(certificados);
+  }
+);
+
+/* =========================
+   DIPLOMA
+========================= */
+
+app.get(
+  '/diploma/:id',
+  (req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        'diploma.html'
+      )
+    );
+
+  }
+);
+
+/* =========================
+   VERIFICACIÓN QR
+========================= */
+
+app.get(
+  '/verificar/:id',
+  (req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        'verificar.html'
+      )
+    );
+
+  }
+);
+
+/* =========================
+   INICIAR SERVIDOR
+========================= */
+
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => {
+
+    console.log(
+      `Sistema de diplomas iniciado en puerto ${PORT}`
+    );
+
+  }
+);
