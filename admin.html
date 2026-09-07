@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sistema de Diplomas</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#f4f4f5;color:#18181b}
+    header{background:#111;color:#fff;padding:18px 22px;font-size:22px;font-weight:700}
+    .wrap{max-width:1150px;margin:28px auto;padding:0 18px}
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:22px}
+    .card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 4px 18px #00000010}
+    h2{margin:0 0 18px}.field{margin-bottom:13px}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+    input{width:100%;padding:12px;border:1px solid #d4d4d8;border-radius:9px;font-size:15px}
+    button,a.btn{border:0;border-radius:9px;padding:11px 14px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
+    .primary{background:#111;color:#fff}.danger{background:#fee2e2;color:#991b1b}
+    table{width:100%;border-collapse:collapse}th,td{padding:11px 8px;border-bottom:1px solid #eee;text-align:left;font-size:14px;vertical-align:top}
+    th{font-size:12px;text-transform:uppercase;color:#71717a}
+    .actions{display:flex;gap:7px;flex-wrap:wrap}
+    .muted{color:#71717a;font-size:13px}
+    .search{margin-bottom:14px}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}.card{overflow:auto}}
+  </style>
+</head>
+<body>
+<header>Centro Constitución · Sistema de Diplomas</header>
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <h2>Nuevo diploma</h2>
+      <form id="form">
+        <div class="field"><label>Alumno</label><input name="alumno" required placeholder="Nombre y apellido"></div>
+        <div class="field"><label>Curso</label><input name="curso" required placeholder="Ej. Perfeccionamiento en corte de damas"></div>
+        <div class="field"><label>Profesor/a</label><input name="profesor" required placeholder="Nombre del profesor"></div>
+        <div class="field"><label>Director/a</label><input name="director" required value="Derlis Villalba"></div>
+        <div class="field"><label>Fecha</label><input id="fecha" name="fecha" type="date" required></div>
+        <button class="primary" type="submit">Generar diploma</button>
+      </form>
+      <p class="muted">La fecha se carga automáticamente. El QR se genera solo y apunta a la verificación pública.</p>
+    </div>
+
+    <div class="card">
+      <h2>Diplomas generados</h2>
+      <input class="search" id="search" placeholder="Buscar alumno, curso, profesor o código">
+      <div id="table"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  $('#fecha').value = new Date().toISOString().slice(0,10);
+
+  async function load(q='') {
+    const r = await fetch('/api/certificados?q=' + encodeURIComponent(q));
+    const data = await r.json();
+    $('#table').innerHTML = `
+      <table>
+        <thead><tr><th>Alumno</th><th>Curso</th><th>Código</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${data.map(x => `
+            <tr>
+              <td><strong>${escapeHtml(x.alumno)}</strong><br><span class="muted">${escapeHtml(x.fecha)}</span></td>
+              <td>${escapeHtml(x.curso)}</td>
+              <td>${escapeHtml(x.codigo)}</td>
+              <td><div class="actions">
+                <a class="btn primary" target="_blank" href="/diploma/${x.id}">Ver / imprimir</a>
+                <a class="btn" target="_blank" href="/verificar/${x.id}">Verificar</a>
+                <button class="danger" onclick="delCert('${x.id}')">Eliminar</button>
+              </div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function escapeHtml(v='') {
+    return String(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  $('#form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const body = Object.fromEntries(new FormData(e.target).entries());
+    const r = await fetch('/api/certificados', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (!r.ok) return alert(data.error || 'Error');
+    window.open('/diploma/' + data.id, '_blank');
+    e.target.alumno.value = '';
+    e.target.curso.value = '';
+    e.target.profesor.value = '';
+    $('#fecha').value = new Date().toISOString().slice(0,10);
+    load();
+  });
+
+  async function delCert(id) {
+    if (!confirm('¿Eliminar este diploma?')) return;
+    await fetch('/api/certificados/' + id, {method:'DELETE'});
+    load($('#search').value);
+  }
+
+  $('#search').addEventListener('input', e => load(e.target.value));
+  load();
+</script>
+</body>
+</html>
