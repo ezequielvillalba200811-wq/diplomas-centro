@@ -453,29 +453,27 @@ res.send(`
          SIN CREAR LINEA NUEVA
       ========================== */
 
-      .firma-docente {
-        position: absolute;
+   .firma-docente,
+.firma-director {
+  position: absolute;
+  bottom: 8.5%;
+  width: 34%;
+  text-align: center;
+}
 
-        bottom: 8.5%;
-        left: 5%;
+.firma-docente {
+  left: 5%;
+}
 
-        width: 34%;
+.firma-director {
+  right: 5%;
+}
 
-        text-align: center;
-      }
-
-      .texto-firma {
-        display: inline-block;
-
-        font-size: 5.5mm;
-        font-weight: 700;
-
-        white-space: nowrap;
-
-        background: white;
-
-        padding: 1mm 2mm;
-      }
+.texto-firma {
+  font-size: 5.5mm;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
       /* =========================
          QR ARRIBA DERECHA
