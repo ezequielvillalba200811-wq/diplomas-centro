@@ -599,26 +599,29 @@ res.send(`
           ${escapeHtml(fecha)}
         </div>
 
-        <!-- DOCENTE -->
+<!-- DOCENTE -->
 
-        <div class="firma-docente">
+<div class="firma-docente">
+  <div class="texto-firma">
+    ${escapeHtml(docente)}: ${escapeHtml(cargoDocente)}
+  </div>
+</div>
 
-          <div class="texto-firma">
+<!-- DIRECTOR -->
 
-            ${escapeHtml(docente)}:
-            ${escapeHtml(cargoDocente)}
+<div class="firma-director">
+  <div class="texto-firma">
+    ${escapeHtml(director)}: Director
+  </div>
+</div>
 
-          </div>
+</div>
 
-        </div>
+</div>
 
-      </div>
+</body>
 
-    </div>
-
-  </body>
-
-  </html>
+</html>
 `);
 
   } catch (error) {
