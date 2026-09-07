@@ -1,390 +1,374 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Diploma - Centro Constitución</title>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: #ddd;
-  font-family: Arial, sans-serif;
-}
-
-.toolbar {
-  background: #111;
-  padding: 12px;
-  text-align: center;
-}
-
-.toolbar button {
-  border: 0;
-  border-radius: 8px;
-  padding: 11px 20px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding: 15px 0;
-}
-
-.sheet {
-  position: relative;
-
-  width: 1123px;
-  height: 794px;
-
-  margin: 0 auto;
-
-  background-image: url('/template-diploma.jpeg');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  overflow: hidden;
-}
-
-/* NOMBRE DEL ALUMNO */
-
-.student {
-  position: absolute;
-
-  top: 345px;
-  left: 190px;
-
-  width: 743px;
-
-  text-align: center;
-
-  font-size: 37px;
-  line-height: 1;
-
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-/* CURSO */
-
-.course {
-  position: absolute;
-
-  top: 555px;
-  left: 175px;
-
-  width: 773px;
-
-  text-align: center;
-
-  font-size: 32px;
-  line-height: 1.05;
-
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-/* FECHA */
-
-.citydate {
-  position: absolute;
-
-  top: 635px;
-  left: 245px;
-
-  width: 635px;
-
-  text-align: center;
-
-  font-size: 22px;
-
-  font-weight: 700;
-  font-style: italic;
-}
-
-/* PROFESORA */
-
-.professor {
-  position: absolute;
-
-  left: 100px;
-  top: 694px;
-
-  width: 270px;
-
-  text-align: center;
-
-  font-size: 23px;
-  font-weight: 700;
-}
-
-/* DIRECTOR */
-
-.director {
-  position: absolute;
-
-  right: 100px;
-  top: 694px;
-
-  width: 270px;
-
-  text-align: center;
-
-  font-size: 23px;
-  font-weight: 700;
-}
-
-/* QR */
-
-.qr {
-  position: absolute;
-
-  right: 53px;
-  top: 43px;
-
-  width: 145px;
-  height: 145px;
-
-  background: white;
-}
-
-.qr img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* CÓDIGO */
-
-.code {
-  position: absolute;
-
-  bottom: 17px;
-  left: 411px;
-
-  width: 300px;
-
-  text-align: center;
-
-  font-size: 13px;
-  color: #444;
-}
-
-
-/* IMPRESIÓN */
-
-@page {
-  size: A4 landscape;
-  margin: 0;
-}
-
-@media print {
-
-  body {
-    background: white;
-  }
-
-  .toolbar {
-    display: none;
-  }
-
-  .wrapper {
-    padding: 0;
-    overflow: visible;
-  }
-
-  .sheet {
-    width: 297mm;
-    height: 210mm;
-    margin: 0;
+import express from 'express';
+import QRCode from 'qrcode';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const DATA_FILE = path.join(__dirname, 'certificados.json');
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+function readCertificados() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch {
+    return [];
   }
 }
 
-</style>
-</head>
+function writeCertificados(data) {
+  fs.writeFileSync(
+    DATA_FILE,
+    JSON.stringify(data, null, 2),
+    'utf8'
+  );
+}
 
-<body>
+function slugify(text = '') {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
-<div class="toolbar">
+function codigoCertificado() {
+  const year = new Date().getFullYear();
 
-  <button onclick="window.print()">
-    Imprimir / Guardar PDF
-  </button>
+  const random = crypto
+    .randomBytes(3)
+    .toString('hex')
+    .toUpperCase();
 
-</div>
+  return `CC-${year}-${random}`;
+}
 
-<div class="wrapper">
+function publicUrl(req) {
+  const configured = String(
+    process.env.PUBLIC_URL || ''
+  )
+    .trim()
+    .replace(/\/$/, '');
 
-  <div class="sheet">
-
-    <div
-      class="student"
-      id="student">
-    </div>
-
-    <div
-      class="course"
-      id="course">
-    </div>
-
-    <div
-      class="citydate"
-      id="citydate">
-    </div>
-
-    <div
-      class="professor"
-      id="professor">
-    </div>
-
-    <div
-      class="director"
-      id="director">
-    </div>
-
-    <div class="qr">
-
-      <img
-        id="qr"
-        alt="Código QR">
-
-    </div>
-
-    <div
-      class="code"
-      id="code">
-    </div>
-
-  </div>
-
-</div>
-
-
-<script>
-
-(async () => {
-
-  const id =
-    location.pathname
-      .split('/')
-      .pop();
-
-  const response =
-    await fetch(
-      '/api/certificados/' + id
-    );
-
-  const certificado =
-    await response.json();
-
-  if (!response.ok) {
-
-    document.body.innerHTML =
-      '<h1 style="text-align:center">Diploma no encontrado</h1>';
-
-    return;
+  if (configured) {
+    return configured;
   }
 
+  const proto =
+    req.headers['x-forwarded-proto'] ||
+    req.protocol;
 
-  /* ALUMNO */
+  return `${proto}://${req.get('host')}`;
+}
 
-  document
-    .getElementById('student')
-    .textContent =
-      certificado.alumno;
+/* =========================
+   ARCHIVOS
+========================= */
 
+app.get('/template-diploma.jpeg', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, 'template-diploma.jpeg')
+  );
+});
 
-  /* CURSO */
+/* =========================
+   PANEL
+========================= */
 
-  document
-    .getElementById('course')
-    .textContent =
-      certificado.curso;
+app.get('/', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, 'admin.html')
+  );
+});
 
+/* =========================
+   LISTAR CERTIFICADOS
+========================= */
 
-  /* FECHA */
+app.get('/api/certificados', (req, res) => {
+  const certificados = readCertificados();
 
-  const partes =
-    certificado.fecha
-      .split('-')
-      .map(Number);
+  const q = String(
+    req.query.q || ''
+  )
+    .trim()
+    .toLowerCase();
 
-  const fecha =
-    new Date(
-      partes[0],
-      partes[1] - 1,
-      partes[2]
-    );
+  if (!q) {
+    return res.json(certificados);
+  }
 
-  const dia =
-    String(
-      fecha.getDate()
-    ).padStart(2, '0');
+  const resultados =
+    certificados.filter(certificado => {
 
-  const mes =
-    fecha.toLocaleDateString(
-      'es-AR',
-      {
-        month: 'long'
+      const campos = [
+        certificado.alumno,
+        certificado.curso,
+        certificado.profesor,
+        certificado.director,
+        certificado.codigo
+      ];
+
+      return campos.some(campo =>
+        String(campo || '')
+          .toLowerCase()
+          .includes(q)
+      );
+    });
+
+  res.json(resultados);
+});
+
+/* =========================
+   CREAR CERTIFICADO
+========================= */
+
+app.post(
+  '/api/certificados',
+  async (req, res) => {
+
+    try {
+
+      const alumno =
+        String(req.body.alumno || '').trim();
+
+      const curso =
+        String(req.body.curso || '').trim();
+
+      const profesor =
+        String(req.body.profesor || '').trim();
+
+      const director =
+        String(req.body.director || '').trim();
+
+      const fecha =
+        String(req.body.fecha || '').trim();
+
+      if (
+        !alumno ||
+        !curso ||
+        !profesor ||
+        !director ||
+        !fecha
+      ) {
+
+        return res.status(400).json({
+          error: 'Faltan datos obligatorios.'
+        });
+
       }
+
+      const certificados =
+        readCertificados();
+
+      const id =
+        crypto.randomUUID();
+
+      const codigo =
+        codigoCertificado();
+
+      const verifyUrl =
+        `${publicUrl(req)}/verificar/${id}`;
+
+      const qr =
+        await QRCode.toDataURL(
+          verifyUrl,
+          {
+            width: 700,
+            margin: 1,
+            errorCorrectionLevel: 'H'
+          }
+        );
+
+      const certificado = {
+
+        id,
+        codigo,
+
+        alumno,
+        curso,
+
+        curso_slug:
+          slugify(curso),
+
+        profesor,
+        director,
+        fecha,
+
+        qr,
+
+        created_at:
+          new Date().toISOString()
+      };
+
+      certificados.unshift(
+        certificado
+      );
+
+      writeCertificados(
+        certificados
+      );
+
+      res.json(certificado);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          'No se pudo generar el certificado.'
+      });
+
+    }
+  }
+);
+
+/* =========================
+   VER CERTIFICADO
+========================= */
+
+app.get(
+  '/api/certificados/:id',
+  (req, res) => {
+
+    const certificado =
+      readCertificados().find(
+        item =>
+          item.id === req.params.id
+      );
+
+    if (!certificado) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            'Certificado no encontrado.'
+        });
+
+    }
+
+    res.json(certificado);
+  }
+);
+
+/* =========================
+   ELIMINAR CERTIFICADO
+========================= */
+
+app.delete(
+  '/api/certificados/:id',
+  (req, res) => {
+
+    const certificados =
+      readCertificados();
+
+    const nuevos =
+      certificados.filter(
+        item =>
+          item.id !== req.params.id
+      );
+
+    if (
+      nuevos.length ===
+      certificados.length
+    ) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            'Certificado no encontrado.'
+        });
+
+    }
+
+    writeCertificados(nuevos);
+
+    res.json({
+      ok: true
+    });
+  }
+);
+
+/* =========================
+   EGRESADOS POR CURSO
+========================= */
+
+app.get(
+  '/api/curso/:slug',
+  (req, res) => {
+
+    const certificados =
+      readCertificados()
+        .filter(
+          item =>
+            item.curso_slug ===
+            req.params.slug
+        );
+
+    res.json(certificados);
+  }
+);
+
+/* =========================
+   DIPLOMA
+========================= */
+
+app.get(
+  '/diploma/:id',
+  (req, res) => {
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        'diploma.html'
+      )
     );
 
-  const anio =
-    fecha.getFullYear();
+  }
+);
 
-  document
-    .getElementById('citydate')
-    .textContent =
-      `${dia} de ${mes} de ${anio}`;
+/* =========================
+   VERIFICACIÓN QR
+========================= */
 
+app.get(
+  '/verificar/:id',
+  (req, res) => {
 
-  /* PROFESORA */
+    res.sendFile(
+      path.join(
+        __dirname,
+        'verificar.html'
+      )
+    );
 
-  document
-    .getElementById('professor')
-    .textContent =
-      certificado.profesor;
+  }
+);
 
+/* =========================
+   INICIAR SERVIDOR
+========================= */
 
-  /* DIRECTOR */
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => {
 
-  document
-    .getElementById('director')
-    .textContent =
-      certificado.director;
+    console.log(
+      `Sistema de diplomas iniciado en puerto ${PORT}`
+    );
 
-
-  /* QR */
-
-  document
-    .getElementById('qr')
-    .src =
-      certificado.qr;
-
-
-  /* CÓDIGO */
-
-  document
-    .getElementById('code')
-    .textContent =
-      certificado.codigo;
-
-})();
-
-</script>
-
-</body>
-</html>
+  }
+);
