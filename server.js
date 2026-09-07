@@ -437,17 +437,31 @@ res.send(`
          SOLO LA FECHA
       ========================== */
 
-   .fecha {
+ .fecha-dia,
+.fecha-mes,
+.fecha-anio {
   position: absolute;
   top: 72.5%;
-  left: 36%;
-  width: 50%;
-  text-align: center;
   font-size: 5.5mm;
   font-weight: 700;
+  text-align: center;
   white-space: nowrap;
 }
 
+.fecha-dia {
+  left: 41%;
+  width: 7%;
+}
+
+.fecha-mes {
+  left: 52%;
+  width: 25%;
+}
+
+.fecha-anio {
+  right: 5%;
+  width: 6%;
+}
       /* =========================
          DOCENTE
          SIN CREAR LINEA NUEVA
