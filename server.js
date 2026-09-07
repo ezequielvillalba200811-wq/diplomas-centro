@@ -64,6 +64,7 @@ app.get('/', (req, res) => {
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
       <title>Centro Constitución - Diplomas</title>
 
       <style>
@@ -112,11 +113,13 @@ app.get('/', (req, res) => {
           font-weight: bold;
         }
 
-        input {
+        input,
+        select {
           padding: 12px;
           border-radius: 8px;
           border: 1px solid #bbb;
           font-size: 16px;
+          background: white;
         }
 
         button {
@@ -148,15 +151,20 @@ app.get('/', (req, res) => {
     </head>
 
     <body>
+
       <div class="contenedor">
+
         <div class="panel">
+
           <h1>Crear certificado</h1>
 
           <form method="POST" action="/crear">
+
             <div class="grid">
 
               <div class="campo">
                 <label>Nombre del alumno</label>
+
                 <input
                   name="alumno"
                   placeholder="Ej: Juan Pérez"
@@ -166,15 +174,17 @@ app.get('/', (req, res) => {
 
               <div class="campo">
                 <label>Curso</label>
+
                 <input
                   name="curso"
-                  placeholder="Ej: Barbería Profesional"
+                  placeholder="Ej: Barbería Nivel Inicial"
                   required
                 />
               </div>
 
               <div class="campo">
                 <label>Fecha</label>
+
                 <input
                   name="fecha"
                   placeholder="Ej: 7 de septiembre de 2026"
@@ -183,28 +193,37 @@ app.get('/', (req, res) => {
               </div>
 
               <div class="campo">
-                <label>Docente</label>
+                <label>Nombre del profesor/a</label>
+
                 <input
                   name="docente"
-                  placeholder="Ej: Matus Acosta"
+                  value="María Acosta"
+                  placeholder="Ej: María Acosta"
                   required
                 />
               </div>
 
               <div class="campo">
-                <label>Cargo docente</label>
-                <input
-                  name="cargoDocente"
-                  placeholder="Ej: Profesora o Profesor"
-                  required
-                />
+                <label>Profesor o Profesora</label>
+
+                <select name="cargoDocente" required>
+                  <option value="Profesora">
+                    Profesora
+                  </option>
+
+                  <option value="Profesor">
+                    Profesor
+                  </option>
+                </select>
               </div>
 
               <div class="campo">
-                <label>Director/a</label>
+                <label>Director</label>
+
                 <input
                   name="director"
-                  placeholder="Nombre del director o directora"
+                  value="Derlis Villalba"
+                  placeholder="Ej: Derlis Villalba"
                   required
                 />
               </div>
@@ -214,13 +233,17 @@ app.get('/', (req, res) => {
             <button type="submit">
               Generar certificado
             </button>
+
           </form>
 
           <div class="ayuda">
             El certificado tendrá un QR único para verificar su autenticidad.
           </div>
+
         </div>
+
       </div>
+
     </body>
     </html>
   `);
@@ -251,26 +274,39 @@ app.post('/crear', async (req, res) => {
     };
 
     const certificados = leerCertificados();
+
     certificados.push(certificado);
+
     guardarCertificados(certificados);
 
-    const urlVerificacion = `${PUBLIC_URL}/verificar/${id}`;
+    const urlVerificacion =
+      `${PUBLIC_URL}/verificar/${id}`;
 
-    const qr = await QRCode.toDataURL(urlVerificacion, {
-      width: 300,
-      margin: 1
-    });
+    const qr = await QRCode.toDataURL(
+      urlVerificacion,
+      {
+        width: 300,
+        margin: 1
+      }
+    );
 
     res.send(`
       <!DOCTYPE html>
       <html lang="es">
+
       <head>
+
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
 
         <title>Certificado</title>
 
         <style>
+
           * {
             box-sizing: border-box;
           }
@@ -279,44 +315,77 @@ app.post('/crear', async (req, res) => {
           body {
             margin: 0;
             padding: 0;
+
             background: #ddd;
-            font-family: Georgia, "Times New Roman", serif;
+
+            font-family:
+              Arial,
+              Helvetica,
+              sans-serif;
           }
 
           .acciones {
             max-width: 1120px;
+
             margin: 15px auto;
+
             display: flex;
+
             gap: 10px;
+
             padding: 0 10px;
           }
 
           .acciones button,
           .acciones a {
             flex: 1;
+
             padding: 12px;
+
             text-align: center;
+
             border: 0;
+
             border-radius: 8px;
+
             background: #111;
+
             color: white;
+
             text-decoration: none;
-            font-family: Arial, sans-serif;
+
+            font-family:
+              Arial,
+              sans-serif;
+
             font-weight: bold;
+
             cursor: pointer;
           }
 
+          .vista {
+            width: 100%;
+
+            overflow-x: auto;
+          }
+
           .certificado {
-            width: 297mm;
-            height: 210mm;
-            margin: 0 auto 30px;
             position: relative;
 
+            width: 297mm;
+            height: 210mm;
+
+            margin: 0 auto 30px;
+
+            background-color: white;
+
             background-image:
-              url("/1C338680-D785-40EE-8803-6DF5AAE1103C.png");
+              url("/fondo-certificado.png");
 
             background-size: 100% 100%;
+
             background-repeat: no-repeat;
+
             background-position: center;
 
             overflow: hidden;
@@ -324,228 +393,390 @@ app.post('/crear', async (req, res) => {
 
           .alumno {
             position: absolute;
-            top: 70mm;
-            left: 24mm;
-            width: 249mm;
+
+            top: 39.5%;
+
+            left: 7%;
+
+            width: 86%;
+
             text-align: center;
-            font-size: 30px;
-            font-weight: bold;
+
+            font-size: 10mm;
+
+            font-weight: 900;
+
+            text-transform: uppercase;
+
+            line-height: 1.05;
           }
 
           .curso {
             position: absolute;
-            top: 112mm;
-            left: 24mm;
-            width: 249mm;
+
+            top: 62%;
+
+            left: 5%;
+
+            width: 90%;
+
             text-align: center;
-            font-size: 25px;
-            font-weight: bold;
+
+            font-size: 8.5mm;
+
+            font-weight: 900;
+
+            text-transform: uppercase;
+
+            line-height: 1.05;
           }
 
           .fecha {
             position: absolute;
-            top: 143mm;
-            left: 72mm;
-            width: 153mm;
+
+            top: 72.5%;
+
+            left: 7%;
+
+            width: 86%;
+
             text-align: center;
-            font-size: 18px;
-            font-style: italic;
+
+            font-size: 5.7mm;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+          }
+
+          .firma-docente,
+          .firma-director {
+            position: absolute;
+
+            bottom: 7%;
+
+            width: 34%;
+
+            text-align: center;
           }
 
           .firma-docente {
-            position: absolute;
-            top: 173mm;
-            left: 20mm;
-            width: 90mm;
-            text-align: center;
+            left: 5%;
           }
 
           .firma-director {
-            position: absolute;
-            top: 173mm;
-            right: 20mm;
-            width: 90mm;
-            text-align: center;
+            right: 5%;
           }
 
-          .nombre-firma {
-            font-size: 17px;
-            font-weight: bold;
+          .espacio-firma {
+            height: 17mm;
           }
 
-          .cargo {
-            margin-top: 3px;
-            font-size: 15px;
+          .linea-firma {
+            width: 80%;
+
+            margin: 0 auto 3mm;
+
+            border-top: 1.5px solid #111;
+          }
+
+          .texto-firma {
+            font-size: 5.5mm;
+
+            font-weight: 700;
+
+            white-space: nowrap;
           }
 
           .qr {
             position: absolute;
-            right: 9mm;
-            bottom: 8mm;
-            width: 25mm;
-            height: 25mm;
+
+            right: 8mm;
+
+            bottom: 7mm;
+
+            width: 23mm;
+
+            height: 23mm;
+
             background: white;
-            padding: 2mm;
+
+            padding: 1.5mm;
           }
 
           .qr img {
-            width: 100%;
-            height: 100%;
             display: block;
+
+            width: 100%;
+
+            height: 100%;
           }
 
           @page {
             size: A4 landscape;
+
             margin: 0;
           }
 
           @media print {
+
             html,
             body {
+              width: 297mm;
+
+              height: 210mm;
+
+              margin: 0;
+
+              padding: 0;
+
               background: white;
             }
 
             .acciones {
-              display: none;
+              display: none !important;
+            }
+
+            .vista {
+              width: 297mm;
+
+              height: 210mm;
+
+              overflow: hidden;
             }
 
             .certificado {
+              width: 297mm;
+
+              height: 210mm;
+
               margin: 0;
+
+              page-break-inside: avoid;
+
               page-break-after: avoid;
+
               -webkit-print-color-adjust: exact;
+
               print-color-adjust: exact;
             }
+
           }
 
-          @media screen and (max-width: 1000px) {
-            body {
-              overflow-x: auto;
-            }
-          }
         </style>
+
       </head>
 
       <body>
 
         <div class="acciones">
-          <a href="/">Crear otro</a>
+
+          <a href="/">
+            Crear otro
+          </a>
 
           <button onclick="window.print()">
             Imprimir / Guardar PDF
           </button>
+
         </div>
 
-        <div class="certificado">
 
-          <div class="alumno">
-            ${escapeHtml(alumno)}
-          </div>
+        <div class="vista">
 
-          <div class="curso">
-            ${escapeHtml(curso)}
-          </div>
+          <div class="certificado">
 
-          <div class="fecha">
-            ${escapeHtml(fecha)}
-          </div>
-
-          <div class="firma-docente">
-            <div class="nombre-firma">
-              ${escapeHtml(docente)}
+            <div class="alumno">
+              ${escapeHtml(alumno)}
             </div>
 
-            <div class="cargo">
-              ${escapeHtml(cargoDocente)}
-            </div>
-          </div>
 
-          <div class="firma-director">
-            <div class="nombre-firma">
-              ${escapeHtml(director)}
+            <div class="curso">
+              ${escapeHtml(curso)}
             </div>
 
-            <div class="cargo">
-              Director/a
-            </div>
-          </div>
 
-          <div class="qr">
-            <img
-              src="${qr}"
-              alt="QR de verificación"
-            />
+            <div class="fecha">
+
+              Ciudad Autónoma de Buenos Aires,
+              ${escapeHtml(fecha)}
+
+            </div>
+
+
+            <div class="firma-docente">
+
+              <div class="espacio-firma"></div>
+
+              <div class="linea-firma"></div>
+
+              <div class="texto-firma">
+
+                ${escapeHtml(docente)}:
+                ${escapeHtml(cargoDocente)}
+
+              </div>
+
+            </div>
+
+
+            <div class="firma-director">
+
+              <div class="espacio-firma"></div>
+
+              <div class="linea-firma"></div>
+
+              <div class="texto-firma">
+
+                ${escapeHtml(director)}:
+                Director
+
+              </div>
+
+            </div>
+
+
+            <div class="qr">
+
+              <img
+                src="${qr}"
+                alt="QR de verificación"
+              />
+
+            </div>
+
           </div>
 
         </div>
 
       </body>
+
       </html>
     `);
 
   } catch (error) {
+
     console.error(error);
 
     res.status(500).send(`
       <h2>Error al generar el certificado</h2>
-      <p>${escapeHtml(error.message)}</p>
-      <a href="/">Volver</a>
+
+      <p>
+        ${escapeHtml(error.message)}
+      </p>
+
+      <a href="/">
+        Volver
+      </a>
     `);
+
   }
 });
 
 app.get('/verificar/:id', (req, res) => {
-  const certificados = leerCertificados();
 
-  const certificado = certificados.find(
-    item => item.id === req.params.id
-  );
+  const certificados =
+    leerCertificados();
+
+  const certificado =
+    certificados.find(
+      item =>
+        item.id === req.params.id
+    );
 
   if (!certificado) {
+
     return res.status(404).send(`
       <!DOCTYPE html>
+
       <html lang="es">
+
       <head>
+
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Certificado no encontrado</title>
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        >
+
+        <title>
+          Certificado no encontrado
+        </title>
+
       </head>
 
-      <body style="
-        font-family: Arial;
-        text-align: center;
-        padding: 40px;
-      ">
-        <h1>❌ Certificado no válido</h1>
-        <p>No encontramos este certificado en nuestros registros.</p>
+      <body
+        style="
+          font-family: Arial;
+          text-align: center;
+          padding: 40px;
+        "
+      >
+
+        <h1>
+          ❌ Certificado no válido
+        </h1>
+
+        <p>
+          No encontramos este certificado
+          en nuestros registros.
+        </p>
+
       </body>
+
       </html>
     `);
+
   }
 
   res.send(`
     <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      <title>Verificación de certificado</title>
+    <html lang="es">
+
+    <head>
+
+      <meta charset="UTF-8" />
+
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+      />
+
+      <title>
+        Verificación de certificado
+      </title>
 
       <style>
+
         body {
           margin: 0;
+
           padding: 20px;
-          font-family: Arial, Helvetica, sans-serif;
+
+          font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
           background: #f2f2f2;
         }
 
         .tarjeta {
           max-width: 600px;
+
           margin: 40px auto;
+
           background: white;
+
           border-radius: 16px;
+
           padding: 30px;
-          box-shadow: 0 5px 20px rgba(0,0,0,.12);
+
+          box-shadow:
+            0 5px 20px
+            rgba(0,0,0,.12);
         }
 
         h1 {
@@ -554,66 +785,113 @@ app.get('/verificar/:id', (req, res) => {
 
         .dato {
           margin: 15px 0;
+
           padding-bottom: 10px;
-          border-bottom: 1px solid #ddd;
+
+          border-bottom:
+            1px solid #ddd;
         }
 
         .dato strong {
           display: block;
+
           margin-bottom: 4px;
         }
+
       </style>
+
     </head>
 
     <body>
 
       <div class="tarjeta">
 
-        <h1>✓ Certificado válido</h1>
+        <h1>
+          ✓ Certificado válido
+        </h1>
 
         <p>
           Este certificado fue emitido por
-          <strong>Centro Constitución</strong>.
+          <strong>
+            Centro Constitución
+          </strong>.
         </p>
 
         <div class="dato">
-          <strong>Alumno</strong>
+
+          <strong>
+            Alumno
+          </strong>
+
           ${escapeHtml(certificado.alumno)}
+
         </div>
 
         <div class="dato">
-          <strong>Curso</strong>
+
+          <strong>
+            Curso
+          </strong>
+
           ${escapeHtml(certificado.curso)}
+
         </div>
 
         <div class="dato">
-          <strong>Fecha</strong>
+
+          <strong>
+            Fecha
+          </strong>
+
           ${escapeHtml(certificado.fecha)}
+
         </div>
 
         <div class="dato">
-          <strong>Docente</strong>
+
+          <strong>
+            Docente
+          </strong>
+
           ${escapeHtml(certificado.docente)}
-          — ${escapeHtml(certificado.cargoDocente)}
+          —
+          ${escapeHtml(certificado.cargoDocente)}
+
         </div>
 
         <div class="dato">
-          <strong>Director/a</strong>
+
+          <strong>
+            Director
+          </strong>
+
           ${escapeHtml(certificado.director)}
+
         </div>
 
         <div class="dato">
-          <strong>ID de certificado</strong>
+
+          <strong>
+            ID de certificado
+          </strong>
+
           ${escapeHtml(certificado.id)}
+
         </div>
 
       </div>
 
     </body>
+
     </html>
   `);
+
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor iniciado en puerto ${PORT}`);
+
+  console.log(
+    `Servidor iniciado en puerto ${PORT}`
+  );
+
 });
