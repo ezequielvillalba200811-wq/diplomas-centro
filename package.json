@@ -1,10 +1,11 @@
 {
-  "name": "diplomas-centro-constitucion",
+  "name": "diplomas-centro",
   "version": "1.0.0",
+  "description": "Sistema de certificados con QR para Centro Constitución",
   "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^5.1.0",
