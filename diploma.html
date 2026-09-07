@@ -33,7 +33,6 @@ body {
   padding: 11px 20px;
   font-size: 16px;
   font-weight: 700;
-  cursor: pointer;
 }
 
 .wrapper {
@@ -48,28 +47,28 @@ body {
   height: 794px;
   margin: 0 auto;
 
-  background-image: url('/template-diploma.jpeg');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    url('/template-diploma.jpeg')
+    center / 100% 100%
+    no-repeat;
 
   overflow: hidden;
 }
 
-/* =========================
+/* =====================
    ALUMNO
-========================= */
+===================== */
 
 .student {
   position: absolute;
 
-  top: 350px;
+  top: 315px;
   left: 150px;
   width: 823px;
 
   text-align: center;
 
-  font-size: 34px;
+  font-size: 32px;
   line-height: 1;
 
   font-weight: 800;
@@ -78,42 +77,44 @@ body {
   white-space: nowrap;
 }
 
-/* =========================
+/* =====================
    CURSO
-========================= */
+===================== */
 
 .course {
   position: absolute;
 
-  top: 510px;
-  left: 135px;
-  width: 853px;
+  top: 475px;
+  left: 145px;
+  width: 833px;
 
   text-align: center;
 
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
 
   font-weight: 900;
   text-transform: uppercase;
+
+  white-space: nowrap;
 }
 
-/* =========================
+/* =====================
    FECHA
-========================= */
+===================== */
 
 .date-day {
   position: absolute;
 
-  top: 594px;
-  left: 602px;
+  top: 553px;
+  left: 572px;
 
-  width: 40px;
+  width: 42px;
 
   text-align: center;
 
   font-family: Georgia, serif;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   font-style: italic;
 }
@@ -121,54 +122,49 @@ body {
 .date-month {
   position: absolute;
 
-  top: 594px;
-  left: 675px;
+  top: 553px;
+  left: 655px;
 
-  width: 165px;
+  width: 170px;
 
   text-align: center;
 
   font-family: Georgia, serif;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   font-style: italic;
-
-  background: white;
 }
 
 .date-year {
   position: absolute;
 
-  top: 594px;
-  left: 893px;
+  top: 553px;
+  left: 892px;
 
-  width: 75px;
+  width: 70px;
 
   text-align: center;
 
   font-family: Georgia, serif;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   font-style: italic;
-
-  background: white;
 }
 
-/* =========================
+/* =====================
    PROFESORA
-========================= */
+===================== */
 
 .professor {
   position: absolute;
 
-  top: 655px;
-  left: 70px;
-
-  width: 300px;
+  top: 641px;
+  left: 62px;
+  width: 310px;
 
   text-align: center;
 
-  font-size: 21px;
+  font-size: 19px;
   line-height: 1;
 
   font-weight: 700;
@@ -176,21 +172,20 @@ body {
   white-space: nowrap;
 }
 
-/* =========================
+/* =====================
    DIRECTOR
-========================= */
+===================== */
 
 .director {
   position: absolute;
 
-  top: 655px;
-  right: 70px;
-
-  width: 300px;
+  top: 641px;
+  right: 62px;
+  width: 310px;
 
   text-align: center;
 
-  font-size: 21px;
+  font-size: 19px;
   line-height: 1;
 
   font-weight: 700;
@@ -198,9 +193,9 @@ body {
   white-space: nowrap;
 }
 
-/* =========================
+/* =====================
    QR
-========================= */
+===================== */
 
 .qr {
   position: absolute;
@@ -216,34 +211,31 @@ body {
 
 .qr img {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: contain;
 }
 
-/* =========================
+/* =====================
    CÓDIGO
-========================= */
+===================== */
 
 .code {
   position: absolute;
 
-  bottom: 15px;
+  bottom: 14px;
   left: 411px;
-
   width: 300px;
 
   text-align: center;
 
-  font-size: 13px;
+  font-size: 12px;
   color: #444;
 }
 
-/* =========================
+/* =====================
    IMPRESIÓN
-========================= */
+===================== */
 
 @page {
   size: A4 landscape;
@@ -278,11 +270,9 @@ body {
 <body>
 
 <div class="toolbar">
-
   <button onclick="window.print()">
     Imprimir / Guardar PDF
   </button>
-
 </div>
 
 <div class="wrapper">
@@ -325,11 +315,7 @@ body {
     </div>
 
     <div class="qr">
-
-      <img
-        id="qr"
-        alt="Código QR">
-
+      <img id="qr" alt="Código QR">
     </div>
 
     <div
@@ -366,21 +352,45 @@ body {
     return;
   }
 
-  /* ALUMNO */
+  /* =====================
+     ALUMNO
+  ===================== */
 
-  document
-    .getElementById('student')
-    .textContent =
-      certificado.alumno;
+  const student =
+    document.getElementById('student');
 
-  /* CURSO */
+  student.textContent =
+    certificado.alumno;
 
-  document
-    .getElementById('course')
-    .textContent =
-      certificado.curso;
+  if (certificado.alumno.length > 32) {
+    student.style.fontSize = '27px';
+  }
 
-  /* FECHA */
+  if (certificado.alumno.length > 42) {
+    student.style.fontSize = '23px';
+  }
+
+  /* =====================
+     CURSO
+  ===================== */
+
+  const course =
+    document.getElementById('course');
+
+  course.textContent =
+    certificado.curso;
+
+  if (certificado.curso.length > 32) {
+    course.style.fontSize = '24px';
+  }
+
+  if (certificado.curso.length > 45) {
+    course.style.fontSize = '21px';
+  }
+
+  /* =====================
+     FECHA
+  ===================== */
 
   const [
     year,
@@ -421,28 +431,46 @@ body {
     .textContent =
       year;
 
-  /* PROFESORA */
+  /* =====================
+     PROFESORA
+  ===================== */
 
-  document
-    .getElementById('professor')
-    .textContent =
-      certificado.profesor;
+  const professor =
+    document.getElementById('professor');
 
-  /* DIRECTOR */
+  professor.textContent =
+    certificado.profesor;
 
-  document
-    .getElementById('director')
-    .textContent =
-      certificado.director;
+  if (certificado.profesor.length > 24) {
+    professor.style.fontSize = '16px';
+  }
 
-  /* QR */
+  /* =====================
+     DIRECTOR
+  ===================== */
+
+  const director =
+    document.getElementById('director');
+
+  director.textContent =
+    certificado.director;
+
+  if (certificado.director.length > 24) {
+    director.style.fontSize = '16px';
+  }
+
+  /* =====================
+     QR
+  ===================== */
 
   document
     .getElementById('qr')
     .src =
       certificado.qr;
 
-  /* CÓDIGO */
+  /* =====================
+     CÓDIGO
+  ===================== */
 
   document
     .getElementById('code')
