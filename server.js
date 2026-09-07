@@ -290,369 +290,345 @@ app.post('/crear', async (req, res) => {
       }
     );
 
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="es">
+res.send(`
+  <!DOCTYPE html>
+  <html lang="es">
 
-      <head>
+  <head>
 
-        <meta charset="UTF-8" />
+    <meta charset="UTF-8" />
 
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0"
-        />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
 
-        <title>Certificado</title>
+    <title>Certificado</title>
 
-        <style>
+    <style>
 
-          * {
-            box-sizing: border-box;
-          }
+      * {
+        box-sizing: border-box;
+      }
 
-          html,
-          body {
-            margin: 0;
-            padding: 0;
+      html,
+      body {
+        margin: 0;
+        padding: 0;
 
-            background: #ddd;
+        background: #ddd;
 
-            font-family:
-              Arial,
-              Helvetica,
-              sans-serif;
-          }
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+      }
 
-          .acciones {
-            max-width: 1120px;
+      .acciones {
+        max-width: 1120px;
 
-            margin: 15px auto;
+        margin: 15px auto;
 
-            display: flex;
+        display: flex;
 
-            gap: 10px;
+        gap: 10px;
 
-            padding: 0 10px;
-          }
+        padding: 0 10px;
+      }
 
-          .acciones button,
-          .acciones a {
-            flex: 1;
+      .acciones button,
+      .acciones a {
+        flex: 1;
 
-            padding: 12px;
+        padding: 12px;
 
-            text-align: center;
+        text-align: center;
 
-            border: 0;
+        border: 0;
 
-            border-radius: 8px;
+        border-radius: 8px;
 
-            background: #111;
+        background: #111;
 
-            color: white;
+        color: white;
 
-            text-decoration: none;
+        text-decoration: none;
 
-            font-family:
-              Arial,
-              sans-serif;
+        font-family:
+          Arial,
+          sans-serif;
 
-            font-weight: bold;
+        font-weight: bold;
 
-            cursor: pointer;
-          }
+        cursor: pointer;
+      }
 
-          .vista {
-            width: 100%;
+      .vista {
+        width: 100%;
+        overflow-x: auto;
+      }
 
-            overflow-x: auto;
-          }
+      .certificado {
+        position: relative;
 
-          .certificado {
-            position: relative;
+        width: 297mm;
+        height: 210mm;
 
-            width: 297mm;
-            height: 210mm;
+        margin: 0 auto 30px;
 
-            margin: 0 auto 30px;
+        background-color: white;
 
-            background-color: white;
+        background-image:
+          url("/fondo-certificado.png");
 
-            background-image:
-              url("/fondo-certificado.png");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center;
 
-            background-size: 100% 100%;
+        overflow: hidden;
+      }
 
-            background-repeat: no-repeat;
+      /* =========================
+         ALUMNO
+      ========================== */
 
-            background-position: center;
+      .alumno {
+        position: absolute;
 
-            overflow: hidden;
-          }
+        top: 39.5%;
+        left: 7%;
 
-          .alumno {
-            position: absolute;
+        width: 86%;
 
-            top: 39.5%;
+        text-align: center;
 
-            left: 7%;
+        font-size: 10mm;
+        font-weight: 900;
 
-            width: 86%;
+        text-transform: uppercase;
 
-            text-align: center;
+        line-height: 1.05;
+      }
 
-            font-size: 10mm;
+      /* =========================
+         CURSO
+      ========================== */
 
-            font-weight: 900;
+      .curso {
+        position: absolute;
 
-            text-transform: uppercase;
+        top: 62%;
+        left: 5%;
 
-            line-height: 1.05;
-          }
+        width: 90%;
 
-          .curso {
-            position: absolute;
+        text-align: center;
 
-            top: 62%;
+        font-size: 8.5mm;
+        font-weight: 900;
 
-            left: 5%;
+        text-transform: uppercase;
 
-            width: 90%;
+        line-height: 1.05;
+      }
 
-            text-align: center;
+      /* =========================
+         FECHA
+         SOLO LA FECHA
+      ========================== */
 
-            font-size: 8.5mm;
+      .fecha {
+        position: absolute;
 
-            font-weight: 900;
+        top: 72.5%;
+        left: 44%;
 
-            text-transform: uppercase;
+        width: 42%;
 
-            line-height: 1.05;
-          }
+        text-align: center;
 
-          .fecha {
-            position: absolute;
+        font-size: 5.5mm;
+        font-weight: 700;
 
-            top: 72.5%;
+        white-space: nowrap;
 
-            left: 7%;
+        background: white;
+      }
 
-            width: 86%;
+      /* =========================
+         DOCENTE
+         SIN CREAR LINEA NUEVA
+      ========================== */
 
-            text-align: center;
+      .firma-docente {
+        position: absolute;
 
-            font-size: 5.7mm;
+        bottom: 8.5%;
+        left: 5%;
 
-            font-weight: 700;
+        width: 34%;
 
-            white-space: nowrap;
-          }
+        text-align: center;
+      }
 
-          .firma-docente,
-          .firma-director {
-            position: absolute;
+      .texto-firma {
+        display: inline-block;
 
-            bottom: 7%;
+        font-size: 5.5mm;
+        font-weight: 700;
 
-            width: 34%;
+        white-space: nowrap;
 
-            text-align: center;
-          }
+        background: white;
 
-          .firma-docente {
-            left: 5%;
-          }
+        padding: 1mm 2mm;
+      }
 
-          .firma-director {
-            right: 5%;
-          }
+      /* =========================
+         QR ARRIBA DERECHA
+      ========================== */
 
-          .espacio-firma {
-            height: 17mm;
-          }
+      .qr {
+        position: absolute;
 
-          .linea-firma {
-            width: 80%;
+        top: 5%;
+        right: 4%;
 
-            margin: 0 auto 3mm;
+        width: 27mm;
+        height: 27mm;
 
-            border-top: 1.5px solid #111;
-          }
+        background: white;
 
-          .texto-firma {
-            font-size: 5.5mm;
+        padding: 2mm;
 
-            font-weight: 700;
+        z-index: 20;
+      }
 
-            white-space: nowrap;
-          }
+      .qr img {
+        display: block;
 
-          .qr {
-            position: absolute;
+        width: 100%;
+        height: 100%;
 
-            right: 8mm;
+        object-fit: contain;
+      }
 
-            bottom: 7mm;
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
 
-            width: 23mm;
+      @media print {
 
-            height: 23mm;
+        html,
+        body {
+          width: 297mm;
+          height: 210mm;
 
-            background: white;
+          margin: 0;
+          padding: 0;
 
-            padding: 1.5mm;
-          }
+          background: white;
+        }
 
-          .qr img {
-            display: block;
+        .acciones {
+          display: none !important;
+        }
 
-            width: 100%;
+        .vista {
+          width: 297mm;
+          height: 210mm;
 
-            height: 100%;
-          }
+          overflow: hidden;
+        }
 
-          @page {
-            size: A4 landscape;
+        .certificado {
+          width: 297mm;
+          height: 210mm;
 
-            margin: 0;
-          }
+          margin: 0;
 
-          @media print {
+          page-break-inside: avoid;
+          page-break-after: avoid;
 
-            html,
-            body {
-              width: 297mm;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
 
-              height: 210mm;
+      }
 
-              margin: 0;
+    </style>
 
-              padding: 0;
+  </head>
 
-              background: white;
-            }
+  <body>
 
-            .acciones {
-              display: none !important;
-            }
+    <div class="acciones">
 
-            .vista {
-              width: 297mm;
+      <a href="/">
+        Crear otro
+      </a>
 
-              height: 210mm;
+      <button onclick="window.print()">
+        Imprimir / Guardar PDF
+      </button>
 
-              overflow: hidden;
-            }
+    </div>
 
-            .certificado {
-              width: 297mm;
+    <div class="vista">
 
-              height: 210mm;
+      <div class="certificado">
 
-              margin: 0;
+        <!-- QR ARRIBA DERECHA -->
 
-              page-break-inside: avoid;
+        <div class="qr">
 
-              page-break-after: avoid;
-
-              -webkit-print-color-adjust: exact;
-
-              print-color-adjust: exact;
-            }
-
-          }
-
-        </style>
-
-      </head>
-
-      <body>
-
-        <div class="acciones">
-
-          <a href="/">
-            Crear otro
-          </a>
-
-          <button onclick="window.print()">
-            Imprimir / Guardar PDF
-          </button>
+          <img
+            src="${qr}"
+            alt="QR de verificación"
+          />
 
         </div>
 
+        <!-- ALUMNO -->
 
-        <div class="vista">
+        <div class="alumno">
+          ${escapeHtml(alumno)}
+        </div>
 
-          <div class="certificado">
+        <!-- CURSO -->
 
-            <div class="alumno">
-              ${escapeHtml(alumno)}
-            </div>
+        <div class="curso">
+          ${escapeHtml(curso)}
+        </div>
 
+        <!-- FECHA -->
 
-            <div class="curso">
-              ${escapeHtml(curso)}
-            </div>
+        <div class="fecha">
+          ${escapeHtml(fecha)}
+        </div>
 
+        <!-- DOCENTE -->
 
-            <div class="fecha">
+        <div class="firma-docente">
 
-              Ciudad Autónoma de Buenos Aires,
-              ${escapeHtml(fecha)}
+          <div class="texto-firma">
 
-            </div>
-
-
-            <div class="firma-docente">
-
-              <div class="espacio-firma"></div>
-
-              <div class="linea-firma"></div>
-
-              <div class="texto-firma">
-
-                ${escapeHtml(docente)}:
-                ${escapeHtml(cargoDocente)}
-
-              </div>
-
-            </div>
-
-
-            <div class="firma-director">
-
-              <div class="espacio-firma"></div>
-
-              <div class="linea-firma"></div>
-
-              <div class="texto-firma">
-
-                ${escapeHtml(director)}:
-                Director
-
-              </div>
-
-            </div>
-
-
-            <div class="qr">
-
-              <img
-                src="${qr}"
-                alt="QR de verificación"
-              />
-
-            </div>
+            ${escapeHtml(docente)}:
+            ${escapeHtml(cargoDocente)}
 
           </div>
 
         </div>
 
-      </body>
+      </div>
 
-      </html>
-    `);
+    </div>
+
+  </body>
+
+  </html>
+`);
 
   } catch (error) {
 
