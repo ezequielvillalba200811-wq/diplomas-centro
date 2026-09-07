@@ -9,23 +9,38 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.static(__dirname));
 const PORT = process.env.PORT || 3000;
 
-const DATA_FILE = path.join(__dirname, 'certificados.json');
+const PUBLIC_URL = (
+  process.env.PUBLIC_URL ||
+  `http://localhost:${PORT}`
+).replace(/\/$/, '');
+
+const DATA_DIR = path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'certificados.json');
+
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+if (!fs.existsSync(DATA_FILE)) {
+  fs.writeFileSync(DATA_FILE, '[]', 'utf8');
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
-function readCertificados() {
+function leerCertificados() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const data = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(data || '[]');
   } catch {
     return [];
   }
 }
 
-function writeCertificados(data) {
+function guardarCertificados(data) {
   fs.writeFileSync(
     DATA_FILE,
     JSON.stringify(data, null, 2),
@@ -33,343 +48,572 @@ function writeCertificados(data) {
   );
 }
 
-function slugify(text = '') {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+function escapeHtml(text = '') {
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
-
-function codigoCertificado() {
-  const year = new Date().getFullYear();
-
-  const random = crypto
-    .randomBytes(3)
-    .toString('hex')
-    .toUpperCase();
-
-  return `CC-${year}-${random}`;
-}
-
-function publicUrl(req) {
-  const configured = String(
-    process.env.PUBLIC_URL || ''
-  )
-    .trim()
-    .replace(/\/$/, '');
-
-  if (configured) {
-    return configured;
-  }
-
-  const proto =
-    req.headers['x-forwarded-proto'] ||
-    req.protocol;
-
-  return `${proto}://${req.get('host')}`;
-}
-
-/* =========================
-   ARCHIVOS
-========================= */
-
-app.get('/template-diploma.jpeg', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, 'template-diploma.jpeg')
-  );
-});
-
-/* =========================
-   PANEL
-========================= */
 
 app.get('/', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, 'admin.html')
-  );
-});
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Centro Constitución - Diplomas</title>
 
-/* =========================
-   LISTAR CERTIFICADOS
-========================= */
+      <style>
+        * {
+          box-sizing: border-box;
+        }
 
-app.get('/api/certificados', (req, res) => {
-  const certificados = readCertificados();
+        body {
+          margin: 0;
+          font-family: Arial, Helvetica, sans-serif;
+          background: #f2f2f2;
+          color: #111;
+        }
 
-  const q = String(
-    req.query.q || ''
-  )
-    .trim()
-    .toLowerCase();
+        .contenedor {
+          max-width: 900px;
+          margin: 30px auto;
+          padding: 20px;
+        }
 
-  if (!q) {
-    return res.json(certificados);
-  }
+        .panel {
+          background: white;
+          border-radius: 14px;
+          padding: 24px;
+          box-shadow: 0 4px 18px rgba(0,0,0,.12);
+        }
 
-  const resultados =
-    certificados.filter(certificado => {
+        h1 {
+          margin-top: 0;
+          text-align: center;
+        }
 
-      const campos = [
-        certificado.alumno,
-        certificado.curso,
-        certificado.profesor,
-        certificado.director,
-        certificado.codigo
-      ];
+        .grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
 
-      return campos.some(campo =>
-        String(campo || '')
-          .toLowerCase()
-          .includes(q)
-      );
-    });
+        .campo {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
 
-  res.json(resultados);
-});
+        label {
+          font-weight: bold;
+        }
 
-/* =========================
-   CREAR CERTIFICADO
-========================= */
+        input {
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #bbb;
+          font-size: 16px;
+        }
 
-app.post(
-  '/api/certificados',
-  async (req, res) => {
+        button {
+          width: 100%;
+          margin-top: 20px;
+          padding: 14px;
+          border: 0;
+          border-radius: 9px;
+          font-size: 17px;
+          font-weight: bold;
+          cursor: pointer;
+          background: #111;
+          color: white;
+        }
 
-    try {
+        .ayuda {
+          margin-top: 12px;
+          font-size: 14px;
+          color: #666;
+          text-align: center;
+        }
 
-      const alumno =
-        String(req.body.alumno || '').trim();
-
-      const curso =
-        String(req.body.curso || '').trim();
-
-      const profesor =
-        String(req.body.profesor || '').trim();
-
-      const director =
-        String(req.body.director || '').trim();
-
-      const fecha =
-        String(req.body.fecha || '').trim();
-
-      if (
-        !alumno ||
-        !curso ||
-        !profesor ||
-        !director ||
-        !fecha
-      ) {
-
-        return res.status(400).json({
-          error: 'Faltan datos obligatorios.'
-        });
-
-      }
-
-      const certificados =
-        readCertificados();
-
-      const id =
-        crypto.randomUUID();
-
-      const codigo =
-        codigoCertificado();
-
-      const verifyUrl =
-        `${publicUrl(req)}/verificar/${id}`;
-
-      const qr =
-        await QRCode.toDataURL(
-          verifyUrl,
-          {
-            width: 700,
-            margin: 1,
-            errorCorrectionLevel: 'H'
+        @media (max-width: 700px) {
+          .grid {
+            grid-template-columns: 1fr;
           }
-        );
+        }
+      </style>
+    </head>
 
-      const certificado = {
+    <body>
+      <div class="contenedor">
+        <div class="panel">
+          <h1>Crear certificado</h1>
 
-        id,
-        codigo,
+          <form method="POST" action="/crear">
+            <div class="grid">
 
-        alumno,
-        curso,
+              <div class="campo">
+                <label>Nombre del alumno</label>
+                <input
+                  name="alumno"
+                  placeholder="Ej: Juan Pérez"
+                  required
+                />
+              </div>
 
-        curso_slug:
-          slugify(curso),
+              <div class="campo">
+                <label>Curso</label>
+                <input
+                  name="curso"
+                  placeholder="Ej: Barbería Profesional"
+                  required
+                />
+              </div>
 
-        profesor,
-        director,
-        fecha,
+              <div class="campo">
+                <label>Fecha</label>
+                <input
+                  name="fecha"
+                  placeholder="Ej: 7 de septiembre de 2026"
+                  required
+                />
+              </div>
 
-        qr,
+              <div class="campo">
+                <label>Docente</label>
+                <input
+                  name="docente"
+                  placeholder="Ej: Matus Acosta"
+                  required
+                />
+              </div>
 
-        created_at:
-          new Date().toISOString()
-      };
+              <div class="campo">
+                <label>Cargo docente</label>
+                <input
+                  name="cargoDocente"
+                  placeholder="Ej: Profesora o Profesor"
+                  required
+                />
+              </div>
 
-      certificados.unshift(
-        certificado
-      );
+              <div class="campo">
+                <label>Director/a</label>
+                <input
+                  name="director"
+                  placeholder="Nombre del director o directora"
+                  required
+                />
+              </div>
 
-      writeCertificados(
-        certificados
-      );
+            </div>
 
-      res.json(certificado);
+            <button type="submit">
+              Generar certificado
+            </button>
+          </form>
 
-    } catch (error) {
+          <div class="ayuda">
+            El certificado tendrá un QR único para verificar su autenticidad.
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+});
 
-      console.error(error);
+app.post('/crear', async (req, res) => {
+  try {
+    const {
+      alumno,
+      curso,
+      fecha,
+      docente,
+      cargoDocente,
+      director
+    } = req.body;
 
-      res.status(500).json({
-        error:
-          'No se pudo generar el certificado.'
-      });
+    const id = crypto.randomUUID();
 
-    }
-  }
-);
+    const certificado = {
+      id,
+      alumno,
+      curso,
+      fecha,
+      docente,
+      cargoDocente,
+      director,
+      creado: new Date().toISOString()
+    };
 
-/* =========================
-   VER CERTIFICADO
-========================= */
+    const certificados = leerCertificados();
+    certificados.push(certificado);
+    guardarCertificados(certificados);
 
-app.get(
-  '/api/certificados/:id',
-  (req, res) => {
+    const urlVerificacion = `${PUBLIC_URL}/verificar/${id}`;
 
-    const certificado =
-      readCertificados().find(
-        item =>
-          item.id === req.params.id
-      );
-
-    if (!certificado) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            'Certificado no encontrado.'
-        });
-
-    }
-
-    res.json(certificado);
-  }
-);
-
-/* =========================
-   ELIMINAR CERTIFICADO
-========================= */
-
-app.delete(
-  '/api/certificados/:id',
-  (req, res) => {
-
-    const certificados =
-      readCertificados();
-
-    const nuevos =
-      certificados.filter(
-        item =>
-          item.id !== req.params.id
-      );
-
-    if (
-      nuevos.length ===
-      certificados.length
-    ) {
-
-      return res
-        .status(404)
-        .json({
-          error:
-            'Certificado no encontrado.'
-        });
-
-    }
-
-    writeCertificados(nuevos);
-
-    res.json({
-      ok: true
+    const qr = await QRCode.toDataURL(urlVerificacion, {
+      width: 300,
+      margin: 1
     });
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Certificado</title>
+
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+            background: #ddd;
+            font-family: Georgia, "Times New Roman", serif;
+          }
+
+          .acciones {
+            max-width: 1120px;
+            margin: 15px auto;
+            display: flex;
+            gap: 10px;
+            padding: 0 10px;
+          }
+
+          .acciones button,
+          .acciones a {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: 0;
+            border-radius: 8px;
+            background: #111;
+            color: white;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+          }
+
+          .certificado {
+            width: 297mm;
+            height: 210mm;
+            margin: 0 auto 30px;
+            position: relative;
+
+            background-image:
+              url("/1C338680-D785-40EE-8803-6DF5AAE1103C.png");
+
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+
+            overflow: hidden;
+          }
+
+          .alumno {
+            position: absolute;
+            top: 70mm;
+            left: 24mm;
+            width: 249mm;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+          }
+
+          .curso {
+            position: absolute;
+            top: 112mm;
+            left: 24mm;
+            width: 249mm;
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+          }
+
+          .fecha {
+            position: absolute;
+            top: 143mm;
+            left: 72mm;
+            width: 153mm;
+            text-align: center;
+            font-size: 18px;
+            font-style: italic;
+          }
+
+          .firma-docente {
+            position: absolute;
+            top: 173mm;
+            left: 20mm;
+            width: 90mm;
+            text-align: center;
+          }
+
+          .firma-director {
+            position: absolute;
+            top: 173mm;
+            right: 20mm;
+            width: 90mm;
+            text-align: center;
+          }
+
+          .nombre-firma {
+            font-size: 17px;
+            font-weight: bold;
+          }
+
+          .cargo {
+            margin-top: 3px;
+            font-size: 15px;
+          }
+
+          .qr {
+            position: absolute;
+            right: 9mm;
+            bottom: 8mm;
+            width: 25mm;
+            height: 25mm;
+            background: white;
+            padding: 2mm;
+          }
+
+          .qr img {
+            width: 100%;
+            height: 100%;
+            display: block;
+          }
+
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+
+          @media print {
+            html,
+            body {
+              background: white;
+            }
+
+            .acciones {
+              display: none;
+            }
+
+            .certificado {
+              margin: 0;
+              page-break-after: avoid;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+
+          @media screen and (max-width: 1000px) {
+            body {
+              overflow-x: auto;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <div class="acciones">
+          <a href="/">Crear otro</a>
+
+          <button onclick="window.print()">
+            Imprimir / Guardar PDF
+          </button>
+        </div>
+
+        <div class="certificado">
+
+          <div class="alumno">
+            ${escapeHtml(alumno)}
+          </div>
+
+          <div class="curso">
+            ${escapeHtml(curso)}
+          </div>
+
+          <div class="fecha">
+            ${escapeHtml(fecha)}
+          </div>
+
+          <div class="firma-docente">
+            <div class="nombre-firma">
+              ${escapeHtml(docente)}
+            </div>
+
+            <div class="cargo">
+              ${escapeHtml(cargoDocente)}
+            </div>
+          </div>
+
+          <div class="firma-director">
+            <div class="nombre-firma">
+              ${escapeHtml(director)}
+            </div>
+
+            <div class="cargo">
+              Director/a
+            </div>
+          </div>
+
+          <div class="qr">
+            <img
+              src="${qr}"
+              alt="QR de verificación"
+            />
+          </div>
+
+        </div>
+
+      </body>
+      </html>
+    `);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).send(`
+      <h2>Error al generar el certificado</h2>
+      <p>${escapeHtml(error.message)}</p>
+      <a href="/">Volver</a>
+    `);
   }
-);
+});
 
-/* =========================
-   EGRESADOS POR CURSO
-========================= */
+app.get('/verificar/:id', (req, res) => {
+  const certificados = leerCertificados();
 
-app.get(
-  '/api/curso/:slug',
-  (req, res) => {
+  const certificado = certificados.find(
+    item => item.id === req.params.id
+  );
 
-    const certificados =
-      readCertificados()
-        .filter(
-          item =>
-            item.curso_slug ===
-            req.params.slug
-        );
+  if (!certificado) {
+    return res.status(404).send(`
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Certificado no encontrado</title>
+      </head>
 
-    res.json(certificados);
+      <body style="
+        font-family: Arial;
+        text-align: center;
+        padding: 40px;
+      ">
+        <h1>❌ Certificado no válido</h1>
+        <p>No encontramos este certificado en nuestros registros.</p>
+      </body>
+      </html>
+    `);
   }
-);
 
-/* =========================
-   DIPLOMA
-========================= */
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-app.get(
-  '/diploma/:id',
-  (req, res) => {
+      <title>Verificación de certificado</title>
 
-    res.sendFile(
-      path.join(
-        __dirname,
-        'diploma.html'
-      )
-    );
+      <style>
+        body {
+          margin: 0;
+          padding: 20px;
+          font-family: Arial, Helvetica, sans-serif;
+          background: #f2f2f2;
+        }
 
-  }
-);
+        .tarjeta {
+          max-width: 600px;
+          margin: 40px auto;
+          background: white;
+          border-radius: 16px;
+          padding: 30px;
+          box-shadow: 0 5px 20px rgba(0,0,0,.12);
+        }
 
-/* =========================
-   VERIFICACIÓN QR
-========================= */
+        h1 {
+          color: #15803d;
+        }
 
-app.get(
-  '/verificar/:id',
-  (req, res) => {
+        .dato {
+          margin: 15px 0;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #ddd;
+        }
 
-    res.sendFile(
-      path.join(
-        __dirname,
-        'verificar.html'
-      )
-    );
+        .dato strong {
+          display: block;
+          margin-bottom: 4px;
+        }
+      </style>
+    </head>
 
-  }
-);
+    <body>
 
-/* =========================
-   INICIAR SERVIDOR
-========================= */
+      <div class="tarjeta">
 
-app.listen(
-  PORT,
-  '0.0.0.0',
-  () => {
+        <h1>✓ Certificado válido</h1>
 
-    console.log(
-      `Sistema de diplomas iniciado en puerto ${PORT}`
-    );
+        <p>
+          Este certificado fue emitido por
+          <strong>Centro Constitución</strong>.
+        </p>
 
-  }
-);
+        <div class="dato">
+          <strong>Alumno</strong>
+          ${escapeHtml(certificado.alumno)}
+        </div>
+
+        <div class="dato">
+          <strong>Curso</strong>
+          ${escapeHtml(certificado.curso)}
+        </div>
+
+        <div class="dato">
+          <strong>Fecha</strong>
+          ${escapeHtml(certificado.fecha)}
+        </div>
+
+        <div class="dato">
+          <strong>Docente</strong>
+          ${escapeHtml(certificado.docente)}
+          — ${escapeHtml(certificado.cargoDocente)}
+        </div>
+
+        <div class="dato">
+          <strong>Director/a</strong>
+          ${escapeHtml(certificado.director)}
+        </div>
+
+        <div class="dato">
+          <strong>ID de certificado</strong>
+          ${escapeHtml(certificado.id)}
+        </div>
+
+      </div>
+
+    </body>
+    </html>
+  `);
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor iniciado en puerto ${PORT}`);
+});
