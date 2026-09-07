@@ -11,6 +11,7 @@
   <title>Certificado - Centro Constitución</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -64,7 +65,7 @@
       border: 1px solid #bbb;
       border-radius: 7px;
       font-size: 16px;
-      background: white;
+      background: #fff;
     }
 
     .botones {
@@ -82,7 +83,7 @@
     }
 
     /* =========================
-       HOJA A4 HORIZONTAL
+       VISTA
     ========================== */
 
     .vista {
@@ -90,32 +91,30 @@
       overflow-x: auto;
     }
 
+    /* =========================
+       CERTIFICADO A4 HORIZONTAL
+    ========================== */
+
     .certificado {
+      position: relative;
 
-  position: relative;
+      width: 297mm;
+      height: 210mm;
 
-  width: 297mm;
+      margin: 0 auto;
 
-  height: 210mm;
+      background-color: #fff;
 
-  margin: 0 auto;
+      background-image: url("/fondo-certificado.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% 100%;
 
-  background-color: #fff;
-
-  background-image: url("/template-diploma.jpeg");
-
-  background-repeat: no-repeat;
-
-  background-position: center;
-
-  background-size: 100% 100%;
-
-  overflow: hidden;
-
-}
+      overflow: hidden;
+    }
 
     /* =========================
-       NOMBRE DEL ALUMNO
+       ALUMNO
     ========================== */
 
     .alumno {
@@ -123,6 +122,7 @@
 
       top: 39.5%;
       left: 7%;
+
       width: 86%;
 
       text-align: center;
@@ -146,6 +146,7 @@
 
       top: 62%;
       left: 5%;
+
       width: 90%;
 
       text-align: center;
@@ -169,6 +170,7 @@
 
       top: 72.5%;
       left: 7%;
+
       width: 86%;
 
       text-align: center;
@@ -188,6 +190,7 @@
     .firma-profesor,
     .firma-director {
       position: absolute;
+
       bottom: 7%;
 
       width: 34%;
@@ -203,25 +206,17 @@
       right: 5%;
     }
 
-    /*
-      Espacio vacío para firma manuscrita
-    */
-
     .espacio-firma {
       height: 17mm;
     }
 
     .linea-firma {
       width: 80%;
+
       margin: 0 auto 3mm;
+
       border-top: 1.5px solid #111;
     }
-
-    /*
-      Nombre + cargo juntos
-      Ej:
-      María Acosta: Profesora
-    */
 
     .texto-firma {
       font-family: Arial, Helvetica, sans-serif;
@@ -237,6 +232,7 @@
     ========================== */
 
     @media (max-width: 700px) {
+
       .campos {
         grid-template-columns: 1fr;
       }
@@ -244,10 +240,12 @@
       .certificado {
         transform-origin: top left;
       }
+
     }
 
     /* =========================
-       IMPRESIÓN A4 HORIZONTAL
+       IMPRESIÓN
+       A4 HORIZONTAL
     ========================== */
 
     @media print {
@@ -265,7 +263,7 @@
         width: 297mm;
         height: 210mm;
 
-        background: white;
+        background: #fff;
       }
 
       .panel {
@@ -288,7 +286,9 @@
         page-break-after: avoid;
         page-break-inside: avoid;
       }
+
     }
+
   </style>
 </head>
 
@@ -296,7 +296,7 @@
 <body>
 
   <!-- =========================
-       PANEL DE EDICIÓN
+       PANEL PARA COMPLETAR
   ========================== -->
 
   <div class="panel">
@@ -356,7 +356,7 @@
       </div>
 
 
-      <!-- PROFESOR -->
+      <!-- PROFESOR/A -->
 
       <div class="campo">
 
@@ -429,8 +429,7 @@
       <div
         class="alumno"
         id="alumnoCertificado"
-      >
-      </div>
+      ></div>
 
 
       <!-- CURSO -->
@@ -438,8 +437,7 @@
       <div
         class="curso"
         id="cursoCertificado"
-      >
-      </div>
+      ></div>
 
 
       <!-- FECHA -->
@@ -447,8 +445,7 @@
       <div
         class="fecha"
         id="fechaCertificado"
-      >
-      </div>
+      ></div>
 
 
       <!-- FIRMA PROFESOR/A -->
@@ -520,7 +517,7 @@
 
 
     /* =========================
-       ALUMNO
+       ACTUALIZAR ALUMNO
     ========================== */
 
     function actualizarAlumno() {
@@ -532,7 +529,7 @@
 
 
     /* =========================
-       CURSO
+       ACTUALIZAR CURSO
     ========================== */
 
     function actualizarCurso() {
@@ -544,7 +541,7 @@
 
 
     /* =========================
-       FECHA
+       ACTUALIZAR FECHA
     ========================== */
 
     function actualizarFecha() {
@@ -560,10 +557,6 @@
 
       }
 
-      /*
-        NO agrega punto después del año
-      */
-
       fechaCertificado.textContent =
         "Ciudad Autónoma de Buenos Aires, " +
         fecha.replace(/\.+$/, "");
@@ -572,7 +565,7 @@
 
 
     /* =========================
-       PROFESOR/A
+       ACTUALIZAR PROFESOR/A
     ========================== */
 
     function actualizarProfesor() {
@@ -591,18 +584,15 @@
 
       }
 
-      /*
-        TODO JUNTO EN UNA SOLA LÍNEA
-
-        Ejemplo:
-        María Acosta: Profesora
-      */
-
       profesorCertificado.textContent =
         nombre + ": " + cargo;
 
     }
 
+
+    /* =========================
+       EVENTOS
+    ========================== */
 
     alumnoInput.addEventListener(
       "input",
@@ -689,6 +679,10 @@
     }
 
 
+    /* =========================
+       MOSTRAR DATOS
+    ========================== */
+
     actualizarAlumno();
     actualizarCurso();
     actualizarFecha();
@@ -696,7 +690,7 @@
 
 
     /* =========================
-       IMPRIMIR
+       IMPRIMIR / PDF
     ========================== */
 
     document
