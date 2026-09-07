@@ -127,14 +127,43 @@
 
       text-align: center;
 
-      font-family: Arial, Helvetica, sans-serif;
-
       font-size: 10mm;
       font-weight: 900;
 
       text-transform: uppercase;
 
       line-height: 1.05;
+    }
+
+    /* =========================
+       QR ARRIBA A LA DERECHA
+    ========================== */
+
+    .qr-certificado {
+      position: absolute;
+
+      top: 5%;
+      right: 4%;
+
+      width: 27mm;
+      height: 27mm;
+
+      background: #fff;
+
+      padding: 2mm;
+
+      z-index: 20;
+
+      display: none;
+    }
+
+    .qr-certificado img {
+      width: 100%;
+      height: 100%;
+
+      object-fit: contain;
+
+      display: block;
     }
 
     /* =========================
@@ -151,8 +180,6 @@
 
       text-align: center;
 
-      font-family: Arial, Helvetica, sans-serif;
-
       font-size: 8.5mm;
       font-weight: 900;
 
@@ -163,68 +190,60 @@
 
     /* =========================
        FECHA
+
+       IMPORTANTE:
+       solo mostramos la fecha,
+       no repetimos "Ciudad Autónoma..."
     ========================== */
 
     .fecha {
       position: absolute;
 
-      top: 72.5%;
-      left: 7%;
+      top: 72.4%;
+      left: 42%;
 
-      width: 86%;
+      width: 45%;
 
       text-align: center;
 
-      font-family: Arial, Helvetica, sans-serif;
-
-      font-size: 5.7mm;
+      font-size: 5.4mm;
       font-weight: 700;
 
       white-space: nowrap;
+
+      background: #fff;
     }
 
     /* =========================
-       FIRMAS
+       PROFESOR/A
+
+       Se coloca sobre el lugar
+       correspondiente sin volver
+       a crear líneas.
     ========================== */
 
-    .firma-profesor,
-    .firma-director {
+    .firma-profesor {
       position: absolute;
 
-      bottom: 7%;
+      bottom: 8.5%;
+      left: 5%;
 
       width: 34%;
 
       text-align: center;
     }
 
-    .firma-profesor {
-      left: 5%;
-    }
-
-    .firma-director {
-      right: 5%;
-    }
-
-    .espacio-firma {
-      height: 17mm;
-    }
-
-    .linea-firma {
-      width: 80%;
-
-      margin: 0 auto 3mm;
-
-      border-top: 1.5px solid #111;
-    }
-
     .texto-firma {
-      font-family: Arial, Helvetica, sans-serif;
-
       font-size: 5.5mm;
       font-weight: 700;
 
       white-space: nowrap;
+
+      background: #fff;
+
+      display: inline-block;
+
+      padding: 1mm 2mm;
     }
 
     /* =========================
@@ -245,7 +264,6 @@
 
     /* =========================
        IMPRESIÓN
-       A4 HORIZONTAL
     ========================== */
 
     @media print {
@@ -296,7 +314,7 @@
 <body>
 
   <!-- =========================
-       PANEL PARA COMPLETAR
+       PANEL
   ========================== -->
 
   <div class="panel">
@@ -304,8 +322,6 @@
     <h2>Crear certificado</h2>
 
     <div class="campos">
-
-      <!-- ALUMNO -->
 
       <div class="campo">
 
@@ -322,8 +338,6 @@
       </div>
 
 
-      <!-- CURSO -->
-
       <div class="campo">
 
         <label for="cursoInput">
@@ -333,13 +347,11 @@
         <input
           id="cursoInput"
           type="text"
-          placeholder="Ej: Perfeccionamiento en corte de damas"
+          placeholder="Ej: Barbería nivel inicial"
         >
 
       </div>
 
-
-      <!-- FECHA -->
 
       <div class="campo">
 
@@ -350,13 +362,11 @@
         <input
           id="fechaInput"
           type="text"
-          placeholder="Ej: 06 de marzo de 2026"
+          placeholder="Ej: 7 de septiembre de 2026"
         >
 
       </div>
 
-
-      <!-- PROFESOR/A -->
 
       <div class="campo">
 
@@ -367,14 +377,12 @@
         <input
           id="profesorInput"
           type="text"
-          value="María Acosta"
-          placeholder="Ej: María Acosta"
+          value="Matus Acosta"
+          placeholder="Ej: Matus Acosta"
         >
 
       </div>
 
-
-      <!-- CARGO -->
 
       <div class="campo">
 
@@ -424,6 +432,21 @@
       id="certificado"
     >
 
+      <!-- QR ARRIBA DERECHA -->
+
+      <div
+        class="qr-certificado"
+        id="qrContenedor"
+      >
+
+        <img
+          id="qrCertificado"
+          alt="QR del certificado"
+        >
+
+      </div>
+
+
       <!-- ALUMNO -->
 
       <div
@@ -448,35 +471,14 @@
       ></div>
 
 
-      <!-- FIRMA PROFESOR/A -->
+      <!-- PROFESOR/A -->
 
       <div class="firma-profesor">
-
-        <div class="espacio-firma"></div>
-
-        <div class="linea-firma"></div>
 
         <div
           class="texto-firma"
           id="profesorCertificado"
-        >
-          María Acosta: Profesora
-        </div>
-
-      </div>
-
-
-      <!-- FIRMA DIRECTOR -->
-
-      <div class="firma-director">
-
-        <div class="espacio-firma"></div>
-
-        <div class="linea-firma"></div>
-
-        <div class="texto-firma">
-          Derlis Villalba: Director
-        </div>
+        ></div>
 
       </div>
 
@@ -515,9 +517,15 @@
     const profesorCertificado =
       document.getElementById("profesorCertificado");
 
+    const qrCertificado =
+      document.getElementById("qrCertificado");
+
+    const qrContenedor =
+      document.getElementById("qrContenedor");
+
 
     /* =========================
-       ACTUALIZAR ALUMNO
+       ALUMNO
     ========================== */
 
     function actualizarAlumno() {
@@ -529,7 +537,7 @@
 
 
     /* =========================
-       ACTUALIZAR CURSO
+       CURSO
     ========================== */
 
     function actualizarCurso() {
@@ -541,7 +549,7 @@
 
 
     /* =========================
-       ACTUALIZAR FECHA
+       FECHA
     ========================== */
 
     function actualizarFecha() {
@@ -549,23 +557,14 @@
       const fecha =
         fechaInput.value.trim();
 
-      if (!fecha) {
-
-        fechaCertificado.textContent = "";
-
-        return;
-
-      }
-
       fechaCertificado.textContent =
-        "Ciudad Autónoma de Buenos Aires, " +
-        fecha.replace(/\.+$/, "");
+        fecha;
 
     }
 
 
     /* =========================
-       ACTUALIZAR PROFESOR/A
+       PROFESOR/A
     ========================== */
 
     function actualizarProfesor() {
@@ -672,9 +671,34 @@
         cargo === "Profesora"
       ) {
 
-        cargoInput.value = cargo;
+        cargoInput.value =
+          cargo;
 
       }
+
+    }
+
+
+    /* =========================
+       QR
+
+       Acepta:
+       ?qr=...
+       o
+       ?qrUrl=...
+    ========================== */
+
+    const qr =
+      params.get("qr") ||
+      params.get("qrUrl");
+
+    if (qr) {
+
+      qrCertificado.src =
+        decodeURIComponent(qr);
+
+      qrContenedor.style.display =
+        "block";
 
     }
 
@@ -690,7 +714,7 @@
 
 
     /* =========================
-       IMPRIMIR / PDF
+       IMPRIMIR
     ========================== */
 
     document
