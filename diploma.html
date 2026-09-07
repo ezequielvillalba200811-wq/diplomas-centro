@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
-  <title>Diploma - Centro Constitución</title>
+  <title>Certificado - Centro Constitución</title>
 
   <style>
     * {
@@ -18,24 +18,25 @@
     body {
       margin: 0;
       padding: 20px;
-      background: #e9e9e9;
+      background: #e7e7e7;
       font-family: Arial, Helvetica, sans-serif;
-      color: #111;
     }
 
-    /* PANEL PARA EDITAR */
+    /* =========================
+       PANEL
+    ========================== */
 
-    .panel-editor {
+    .panel {
       max-width: 1100px;
       margin: 0 auto 20px;
       padding: 20px;
-      background: white;
+      background: #fff;
       border-radius: 12px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 18px rgba(0,0,0,.15);
     }
 
-    .panel-editor h2 {
-      margin-top: 0;
+    .panel h2 {
+      margin: 0 0 20px;
     }
 
     .campos {
@@ -51,368 +52,354 @@
     }
 
     .campo label {
-      font-weight: bold;
       font-size: 14px;
+      font-weight: 700;
     }
 
-    .campo input {
+    .campo input,
+    .campo select {
       width: 100%;
-      padding: 11px;
+      height: 44px;
+      padding: 10px 12px;
       border: 1px solid #bbb;
       border-radius: 7px;
       font-size: 16px;
+      background: white;
     }
 
     .botones {
       margin-top: 18px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
     }
 
     button {
+      padding: 12px 20px;
       border: 0;
-      border-radius: 7px;
-      padding: 11px 18px;
-      font-size: 15px;
-      cursor: pointer;
+      border-radius: 8px;
       background: #111;
-      color: white;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
     }
 
-    /* DIPLOMA */
+    /* =========================
+       HOJA A4 HORIZONTAL
+    ========================== */
 
-    .contenedor-diploma {
-      width: 1123px;
-      max-width: 100%;
-      margin: auto;
-      background: white;
+    .vista {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .certificado {
+      position: relative;
+
+      width: 297mm;
+      height: 210mm;
+
+      margin: 0 auto;
+
+      background-color: #fff;
+
+      background-image:
+        url("fondo-certificado.png");
+
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% 100%;
+
       overflow: hidden;
     }
 
-    .diploma {
-      position: relative;
-      width: 1123px;
-      height: 794px;
-      background: #fff;
-      padding: 55px 70px 70px;
-      overflow: hidden;
-      border: 2px solid #111;
-    }
-
-    /* DECORACIÓN */
-
-    .diploma::before {
-      content: "";
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border: 2px solid rgba(0, 0, 0, 0.035);
-      transform: rotate(45deg);
-      top: -280px;
-      left: -180px;
-    }
-
-    .diploma::after {
-      content: "";
-      position: absolute;
-      width: 520px;
-      height: 520px;
-      border: 2px solid rgba(0, 0, 0, 0.035);
-      transform: rotate(45deg);
-      bottom: -320px;
-      right: -180px;
-    }
-
-    .contenido {
-      position: relative;
-      z-index: 2;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .encabezado {
-      text-align: center;
-    }
-
-    .institucion {
-      font-size: 25px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      margin-bottom: 20px;
-    }
-
-    .titulo {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 58px;
-      font-weight: 700;
-      margin: 5px 0 8px;
-      letter-spacing: 2px;
-    }
-
-    .subtitulo {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 20px;
-      margin-bottom: 28px;
-    }
-
-    .texto {
-      text-align: center;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 20px;
-      line-height: 1.55;
-    }
+    /* =========================
+       NOMBRE DEL ALUMNO
+    ========================== */
 
     .alumno {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 38px;
-      font-weight: 700;
-      margin: 17px 0;
+      position: absolute;
+
+      top: 39.5%;
+      left: 7%;
+      width: 86%;
+
+      text-align: center;
+
+      font-family: Arial, Helvetica, sans-serif;
+
+      font-size: 10mm;
+      font-weight: 900;
+
       text-transform: uppercase;
+
+      line-height: 1.05;
     }
+
+    /* =========================
+       CURSO
+    ========================== */
 
     .curso {
-      font-weight: bold;
-      font-size: 24px;
+      position: absolute;
+
+      top: 62%;
+      left: 5%;
+      width: 90%;
+
+      text-align: center;
+
+      font-family: Arial, Helvetica, sans-serif;
+
+      font-size: 8.5mm;
+      font-weight: 900;
+
+      text-transform: uppercase;
+
+      line-height: 1.05;
     }
 
-    /* PARTE INFERIOR */
-
-    .parte-inferior {
-      margin-top: auto;
-    }
+    /* =========================
+       FECHA
+    ========================== */
 
     .fecha {
+      position: absolute;
+
+      top: 72.5%;
+      left: 7%;
+      width: 86%;
+
       text-align: center;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 17px;
-      margin-bottom: 45px;
-    }
 
-    /* FIRMAS */
+      font-family: Arial, Helvetica, sans-serif;
 
-    .firmas {
-      display: flex;
-      justify-content: space-around;
-      align-items: flex-end;
-      gap: 100px;
-      padding: 0 110px;
-    }
+      font-size: 5.7mm;
+      font-weight: 700;
 
-    .firma {
-      width: 300px;
-      text-align: center;
-    }
-
-    /*
-      Esta zona queda vacía para que
-      profesor y director firmen.
-    */
-
-    .espacio-firma {
-      height: 55px;
-    }
-
-    .linea-firma {
-      width: 100%;
-      border-top: 1.5px solid #111;
-      margin-bottom: 10px;
-    }
-
-    .nombre-cargo {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 17px;
-      font-weight: 600;
       white-space: nowrap;
     }
 
-    .codigo {
-      text-align: center;
-      margin-top: 35px;
-      font-family: monospace;
-      font-size: 14px;
-      letter-spacing: 1px;
-    }
+    /* =========================
+       FIRMAS
+    ========================== */
 
-    /* FRANJAS ABAJO */
-
-    .franjas {
+    .firma-profesor,
+    .firma-director {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 34px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      bottom: 7%;
+
+      width: 34%;
+
+      text-align: center;
     }
 
-    .franja1 {
-      height: 13px;
-      width: 100%;
-      background: #111;
+    .firma-profesor {
+      left: 5%;
     }
 
-    .franja2 {
-      height: 8px;
-      width: 100%;
-      background: #111;
+    .firma-director {
+      right: 5%;
     }
 
-    .franja3 {
-      height: 5px;
-      width: 100%;
-      background: #111;
+    /*
+      Espacio vacío para firma manuscrita
+    */
+
+    .espacio-firma {
+      height: 17mm;
     }
+
+    .linea-firma {
+      width: 80%;
+      margin: 0 auto 3mm;
+      border-top: 1.5px solid #111;
+    }
+
+    /*
+      Nombre + cargo juntos
+      Ej:
+      María Acosta: Profesora
+    */
+
+    .texto-firma {
+      font-family: Arial, Helvetica, sans-serif;
+
+      font-size: 5.5mm;
+      font-weight: 700;
+
+      white-space: nowrap;
+    }
+
+    /* =========================
+       CELULAR
+    ========================== */
 
     @media (max-width: 700px) {
       .campos {
         grid-template-columns: 1fr;
       }
 
-      .contenedor-diploma {
-        overflow-x: auto;
+      .certificado {
+        transform-origin: top left;
       }
     }
 
-    /* IMPRESIÓN */
+    /* =========================
+       IMPRESIÓN A4 HORIZONTAL
+    ========================== */
 
     @media print {
+
       @page {
         size: A4 landscape;
         margin: 0;
       }
 
+      html,
       body {
-        background: white;
+        margin: 0;
         padding: 0;
-        margin: 0;
-      }
 
-      .panel-editor {
-        display: none;
-      }
-
-      .contenedor-diploma {
-        width: 100%;
-        margin: 0;
-      }
-
-      .diploma {
         width: 297mm;
         height: 210mm;
-        border: none;
+
+        background: white;
+      }
+
+      .panel {
+        display: none !important;
+      }
+
+      .vista {
+        width: 297mm;
+        height: 210mm;
+
+        overflow: hidden;
+      }
+
+      .certificado {
+        width: 297mm;
+        height: 210mm;
+
+        margin: 0;
+
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
     }
   </style>
 </head>
 
+
 <body>
 
-  <!--
-    PANEL DE EDICIÓN
-  -->
+  <!-- =========================
+       PANEL DE EDICIÓN
+  ========================== -->
 
-  <div class="panel-editor">
+  <div class="panel">
 
-    <h2>Editar diploma</h2>
+    <h2>Crear certificado</h2>
 
     <div class="campos">
 
+      <!-- ALUMNO -->
+
       <div class="campo">
+
         <label for="alumnoInput">
-          Nombre del alumno
+          Nombre y apellido del alumno
         </label>
 
         <input
-          type="text"
           id="alumnoInput"
-          placeholder="Nombre del alumno"
-        />
+          type="text"
+          placeholder="Ej: Gloria López"
+        >
+
       </div>
 
+
+      <!-- CURSO -->
+
       <div class="campo">
+
         <label for="cursoInput">
           Curso
         </label>
 
         <input
-          type="text"
           id="cursoInput"
-          placeholder="Ej: Curso de Peluquería"
-        />
+          type="text"
+          placeholder="Ej: Perfeccionamiento en corte de damas"
+        >
+
       </div>
 
+
+      <!-- FECHA -->
+
       <div class="campo">
+
+        <label for="fechaInput">
+          Fecha
+        </label>
+
+        <input
+          id="fechaInput"
+          type="text"
+          placeholder="Ej: 06 de marzo de 2026"
+        >
+
+      </div>
+
+
+      <!-- PROFESOR -->
+
+      <div class="campo">
+
         <label for="profesorInput">
           Nombre del profesor/a
         </label>
 
         <input
-          type="text"
           id="profesorInput"
-          placeholder="Ej: María Acosta"
+          type="text"
           value="María Acosta"
-        />
+          placeholder="Ej: María Acosta"
+        >
+
       </div>
 
-      <div class="campo">
-        <label for="diaInput">
-          Día
-        </label>
 
-        <input
-          type="text"
-          id="diaInput"
-          placeholder="Ej: 7"
-        />
-      </div>
+      <!-- CARGO -->
 
       <div class="campo">
-        <label for="mesInput">
-          Mes
+
+        <label for="cargoInput">
+          Profesor o Profesora
         </label>
 
-        <input
-          type="text"
-          id="mesInput"
-          placeholder="Ej: septiembre"
-          value="septiembre"
-        />
-      </div>
+        <select id="cargoInput">
 
-      <div class="campo">
-        <label for="anioInput">
-          Año
-        </label>
+          <option value="Profesora">
+            Profesora
+          </option>
 
-        <input
-          type="text"
-          id="anioInput"
-          value="2026"
-        />
-      </div>
+          <option value="Profesor">
+            Profesor
+          </option>
 
-      <div class="campo">
-        <label for="codigoInput">
-          Código del diploma
-        </label>
+        </select>
 
-        <input
-          type="text"
-          id="codigoInput"
-          placeholder="Ej: CC 2026 1832B9"
-        />
       </div>
 
     </div>
+
 
     <div class="botones">
 
       <button
         type="button"
-        onclick="window.print()"
+        id="imprimirBtn"
       >
         Imprimir / Guardar PDF
       </button>
@@ -422,128 +409,74 @@
   </div>
 
 
-  <!--
-    DIPLOMA
-  -->
+  <!-- =========================
+       CERTIFICADO
+  ========================== -->
 
-  <div class="contenedor-diploma">
+  <div class="vista">
 
-    <div class="diploma" id="diploma">
+    <div
+      class="certificado"
+      id="certificado"
+    >
 
-      <div class="contenido">
+      <!-- ALUMNO -->
 
-        <div class="encabezado">
-
-          <div class="institucion">
-            CENTRO CONSTITUCIÓN
-          </div>
-
-          <div class="titulo">
-            CERTIFICADO
-          </div>
-
-          <div class="subtitulo">
-            DE FINALIZACIÓN
-          </div>
-
-        </div>
+      <div
+        class="alumno"
+        id="alumnoCertificado"
+      >
+      </div>
 
 
-        <div class="texto">
+      <!-- CURSO -->
 
-          Se certifica que
-
-          <div
-            class="alumno"
-            id="alumnoDiploma"
-          >
-            NOMBRE DEL ALUMNO
-          </div>
-
-          ha completado satisfactoriamente el
-
-          <div
-            class="curso"
-            id="cursoDiploma"
-          >
-            CURSO
-          </div>
-
-          otorgado por Centro Constitución.
-
-        </div>
+      <div
+        class="curso"
+        id="cursoCertificado"
+      >
+      </div>
 
 
-        <div class="parte-inferior">
+      <!-- FECHA -->
 
-          <!--
-            IMPORTANTE:
-            NO HAY PUNTO DESPUÉS DEL AÑO
-          -->
-
-          <div class="fecha">
-            Ciudad Autónoma de Buenos Aires,
-            <span id="diaDiploma">___</span>
-            de
-            <span id="mesDiploma">septiembre</span>
-            de
-            <span id="anioDiploma">2026</span>
-          </div>
+      <div
+        class="fecha"
+        id="fechaCertificado"
+      >
+      </div>
 
 
-          <div class="firmas">
+      <!-- FIRMA PROFESOR/A -->
 
-            <!-- PROFESOR/A -->
+      <div class="firma-profesor">
 
-            <div class="firma">
+        <div class="espacio-firma"></div>
 
-              <div class="espacio-firma"></div>
+        <div class="linea-firma"></div>
 
-              <div class="linea-firma"></div>
-
-              <div
-                class="nombre-cargo"
-                id="profesorDiploma"
-              >
-                María Acosta: Profesora
-              </div>
-
-            </div>
-
-
-            <!-- DIRECTOR -->
-
-            <div class="firma">
-
-              <div class="espacio-firma"></div>
-
-              <div class="linea-firma"></div>
-
-              <div class="nombre-cargo">
-                Derlis Villalba: Director
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div
-            class="codigo"
-            id="codigoDiploma"
-          >
-            CC 2026
-          </div>
-
+        <div
+          class="texto-firma"
+          id="profesorCertificado"
+        >
+          María Acosta: Profesora
         </div>
 
       </div>
 
 
-      <div class="franjas">
-        <div class="franja1"></div>
-        <div class="franja2"></div>
-        <div class="franja3"></div>
+      <!-- FIRMA DIRECTOR -->
+
+      <div class="firma-director">
+
+        <div class="espacio-firma"></div>
+
+        <div class="linea-firma"></div>
+
+        <div class="texto-firma">
+          Derlis Villalba: Director
+        </div>
+
       </div>
 
     </div>
@@ -553,247 +486,225 @@
 
   <script>
 
-    /*
-      ELEMENTOS DEL FORMULARIO
-    */
-
     const alumnoInput =
       document.getElementById("alumnoInput");
 
     const cursoInput =
       document.getElementById("cursoInput");
 
+    const fechaInput =
+      document.getElementById("fechaInput");
+
     const profesorInput =
       document.getElementById("profesorInput");
 
-    const diaInput =
-      document.getElementById("diaInput");
-
-    const mesInput =
-      document.getElementById("mesInput");
-
-    const anioInput =
-      document.getElementById("anioInput");
-
-    const codigoInput =
-      document.getElementById("codigoInput");
+    const cargoInput =
+      document.getElementById("cargoInput");
 
 
-    /*
-      ELEMENTOS DEL DIPLOMA
-    */
+    const alumnoCertificado =
+      document.getElementById("alumnoCertificado");
 
-    const alumnoDiploma =
-      document.getElementById("alumnoDiploma");
+    const cursoCertificado =
+      document.getElementById("cursoCertificado");
 
-    const cursoDiploma =
-      document.getElementById("cursoDiploma");
+    const fechaCertificado =
+      document.getElementById("fechaCertificado");
 
-    const profesorDiploma =
-      document.getElementById("profesorDiploma");
-
-    const diaDiploma =
-      document.getElementById("diaDiploma");
-
-    const mesDiploma =
-      document.getElementById("mesDiploma");
-
-    const anioDiploma =
-      document.getElementById("anioDiploma");
-
-    const codigoDiploma =
-      document.getElementById("codigoDiploma");
+    const profesorCertificado =
+      document.getElementById("profesorCertificado");
 
 
-    /*
-      ACTUALIZAR ALUMNO
-    */
+    /* =========================
+       ALUMNO
+    ========================== */
+
+    function actualizarAlumno() {
+
+      alumnoCertificado.textContent =
+        alumnoInput.value.trim();
+
+    }
+
+
+    /* =========================
+       CURSO
+    ========================== */
+
+    function actualizarCurso() {
+
+      cursoCertificado.textContent =
+        cursoInput.value.trim();
+
+    }
+
+
+    /* =========================
+       FECHA
+    ========================== */
+
+    function actualizarFecha() {
+
+      const fecha =
+        fechaInput.value.trim();
+
+      if (!fecha) {
+
+        fechaCertificado.textContent = "";
+
+        return;
+
+      }
+
+      /*
+        NO agrega punto después del año
+      */
+
+      fechaCertificado.textContent =
+        "Ciudad Autónoma de Buenos Aires, " +
+        fecha.replace(/\.+$/, "");
+
+    }
+
+
+    /* =========================
+       PROFESOR/A
+    ========================== */
+
+    function actualizarProfesor() {
+
+      const nombre =
+        profesorInput.value.trim();
+
+      const cargo =
+        cargoInput.value;
+
+      if (!nombre) {
+
+        profesorCertificado.textContent = "";
+
+        return;
+
+      }
+
+      /*
+        TODO JUNTO EN UNA SOLA LÍNEA
+
+        Ejemplo:
+        María Acosta: Profesora
+      */
+
+      profesorCertificado.textContent =
+        nombre + ": " + cargo;
+
+    }
+
 
     alumnoInput.addEventListener(
       "input",
-      function () {
-
-        alumnoDiploma.textContent =
-          alumnoInput.value.trim()
-          || "NOMBRE DEL ALUMNO";
-
-      }
+      actualizarAlumno
     );
-
-
-    /*
-      ACTUALIZAR CURSO
-    */
 
     cursoInput.addEventListener(
       "input",
-      function () {
-
-        cursoDiploma.textContent =
-          cursoInput.value.trim()
-          || "CURSO";
-
-      }
+      actualizarCurso
     );
 
-
-    /*
-      PROFESOR/A EDITABLE
-    */
+    fechaInput.addEventListener(
+      "input",
+      actualizarFecha
+    );
 
     profesorInput.addEventListener(
       "input",
       actualizarProfesor
     );
 
-    function actualizarProfesor() {
-
-      const profesor =
-        profesorInput.value.trim()
-        || "María Acosta";
-
-      profesorDiploma.textContent =
-        profesor + ": Profesora";
-
-    }
-
-
-    /*
-      ACTUALIZAR FECHA
-    */
-
-    diaInput.addEventListener(
-      "input",
-      actualizarFecha
-    );
-
-    mesInput.addEventListener(
-      "input",
-      actualizarFecha
-    );
-
-    anioInput.addEventListener(
-      "input",
-      actualizarFecha
-    );
-
-    function actualizarFecha() {
-
-      diaDiploma.textContent =
-        diaInput.value.trim()
-        || "___";
-
-      mesDiploma.textContent =
-        mesInput.value.trim()
-        || "septiembre";
-
-      anioDiploma.textContent =
-        anioInput.value.trim()
-        || "2026";
-
-    }
-
-
-    /*
-      ACTUALIZAR CÓDIGO
-    */
-
-    codigoInput.addEventListener(
-      "input",
-      function () {
-
-        codigoDiploma.textContent =
-          codigoInput.value.trim()
-          || "CC 2026";
-
-      }
+    cargoInput.addEventListener(
+      "change",
+      actualizarProfesor
     );
 
 
-    /*
-      PERMITE RECIBIR DATOS
-      DESDE LA URL DEL SISTEMA.
+    /* =========================
+       DATOS DESDE URL
+    ========================== */
 
-      EJEMPLO:
-
-      diploma.html
-      ?alumno=Juan Perez
-      &curso=Barberia
-      &profesor=Maria Acosta
-      &dia=7
-      &mes=septiembre
-      &anio=2026
-      &codigo=CC1234
-    */
-
-    const parametros =
+    const params =
       new URLSearchParams(
         window.location.search
       );
 
 
-    if (parametros.get("alumno")) {
+    if (params.get("alumno")) {
 
       alumnoInput.value =
-        parametros.get("alumno");
-
-      alumnoDiploma.textContent =
-        parametros.get("alumno");
+        params.get("alumno");
 
     }
 
 
-    if (parametros.get("curso")) {
+    if (params.get("curso")) {
 
       cursoInput.value =
-        parametros.get("curso");
-
-      cursoDiploma.textContent =
-        parametros.get("curso");
+        params.get("curso");
 
     }
 
 
-    if (parametros.get("profesor")) {
+    if (params.get("fecha")) {
+
+      fechaInput.value =
+        params.get("fecha");
+
+    }
+
+
+    if (params.get("profesor")) {
 
       profesorInput.value =
-        parametros.get("profesor");
-
-      actualizarProfesor();
+        params.get("profesor");
 
     }
 
 
-    if (parametros.get("dia")) {
-      diaInput.value =
-        parametros.get("dia");
+    if (params.get("cargo")) {
+
+      const cargo =
+        params.get("cargo");
+
+      if (
+        cargo === "Profesor" ||
+        cargo === "Profesora"
+      ) {
+
+        cargoInput.value = cargo;
+
+      }
+
     }
 
 
-    if (parametros.get("mes")) {
-      mesInput.value =
-        parametros.get("mes");
-    }
-
-
-    if (parametros.get("anio")) {
-      anioInput.value =
-        parametros.get("anio");
-    }
-
-
+    actualizarAlumno();
+    actualizarCurso();
     actualizarFecha();
+    actualizarProfesor();
 
 
-    if (parametros.get("codigo")) {
+    /* =========================
+       IMPRIMIR
+    ========================== */
 
-      codigoInput.value =
-        parametros.get("codigo");
+    document
+      .getElementById("imprimirBtn")
+      .addEventListener(
+        "click",
+        function () {
 
-      codigoDiploma.textContent =
-        parametros.get("codigo");
+          window.print();
 
-    }
+        }
+      );
 
   </script>
 
