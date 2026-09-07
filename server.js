@@ -437,23 +437,16 @@ res.send(`
          SOLO LA FECHA
       ========================== */
 
-      .fecha {
-        position: absolute;
-
-        top: 72.5%;
-        left: 44%;
-
-        width: 42%;
-
-        text-align: center;
-
-        font-size: 5.5mm;
-        font-weight: 700;
-
-        white-space: nowrap;
-
-        background: white;
-      }
+   .fecha {
+  position: absolute;
+  top: 72.5%;
+  left: 36%;
+  width: 50%;
+  text-align: center;
+  font-size: 5.5mm;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
       /* =========================
          DOCENTE
