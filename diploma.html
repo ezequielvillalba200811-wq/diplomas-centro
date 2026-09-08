@@ -190,10 +190,6 @@
 
     /* =========================
        FECHA
-
-       IMPORTANTE:
-       solo mostramos la fecha,
-       no repetimos "Ciudad Autónoma..."
     ========================== */
 
     .fecha {
@@ -215,25 +211,36 @@
     }
 
     /* =========================
-       PROFESOR/A
-
-       Se coloca sobre el lugar
-       correspondiente sin volver
-       a crear líneas.
+       FIRMAS
     ========================== */
 
     .firma-profesor {
       position: absolute;
 
       bottom: 8.5%;
-      left: 5%;
+      left: 6%;
 
-      width: 34%;
+      width: 35%;
+
+      text-align: center;
+    }
+
+    .firma-director {
+      position: absolute;
+
+      bottom: 8.5%;
+      right: 6%;
+
+      width: 35%;
 
       text-align: center;
     }
 
     .texto-firma {
+      width: 100%;
+
+      text-align: center;
+
       font-size: 5.5mm;
       font-weight: 700;
 
@@ -241,7 +248,7 @@
 
       background: #fff;
 
-      display: inline-block;
+      display: block;
 
       padding: 1mm 2mm;
     }
@@ -353,6 +360,8 @@
       </div>
 
 
+      <!-- CALENDARIO -->
+
       <div class="campo">
 
         <label for="fechaInput">
@@ -361,8 +370,7 @@
 
         <input
           id="fechaInput"
-          type="text"
-          placeholder="Ej: 7 de septiembre de 2026"
+          type="date"
         >
 
       </div>
@@ -401,6 +409,23 @@
           </option>
 
         </select>
+
+      </div>
+
+
+      <!-- DIRECTOR -->
+
+      <div class="campo">
+
+        <label for="directorInput">
+          Nombre del director
+        </label>
+
+        <input
+          id="directorInput"
+          type="text"
+          placeholder="Nombre del director"
+        >
 
       </div>
 
@@ -482,6 +507,18 @@
 
       </div>
 
+
+      <!-- DIRECTOR -->
+
+      <div class="firma-director">
+
+        <div
+          class="texto-firma"
+          id="directorCertificado"
+        ></div>
+
+      </div>
+
     </div>
 
   </div>
@@ -504,6 +541,9 @@
     const cargoInput =
       document.getElementById("cargoInput");
 
+    const directorInput =
+      document.getElementById("directorInput");
+
 
     const alumnoCertificado =
       document.getElementById("alumnoCertificado");
@@ -516,6 +556,9 @@
 
     const profesorCertificado =
       document.getElementById("profesorCertificado");
+
+    const directorCertificado =
+      document.getElementById("directorCertificado");
 
     const qrCertificado =
       document.getElementById("qrCertificado");
@@ -549,16 +592,57 @@
 
 
     /* =========================
-       FECHA
+       FECHA AUTOMÁTICA
     ========================== */
 
     function actualizarFecha() {
 
-      const fecha =
-        fechaInput.value.trim();
+      const valor =
+        fechaInput.value;
+
+      if (!valor) {
+
+        fechaCertificado.textContent = "";
+
+        return;
+
+      }
+
+      const partes =
+        valor.split("-");
+
+      const año =
+        Number(partes[0]);
+
+      const mes =
+        Number(partes[1]);
+
+      const dia =
+        Number(partes[2]);
+
+
+      const meses = [
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre"
+      ];
+
 
       fechaCertificado.textContent =
-        fecha;
+        dia +
+        " de " +
+        meses[mes - 1] +
+        " de " +
+        año;
 
     }
 
@@ -584,7 +668,30 @@
       }
 
       profesorCertificado.textContent =
-        nombre + ": " + cargo;
+        nombre + " - " + cargo;
+
+    }
+
+
+    /* =========================
+       DIRECTOR
+    ========================== */
+
+    function actualizarDirector() {
+
+      const nombre =
+        directorInput.value.trim();
+
+      if (!nombre) {
+
+        directorCertificado.textContent = "";
+
+        return;
+
+      }
+
+      directorCertificado.textContent =
+        nombre + " - Director";
 
     }
 
@@ -604,7 +711,7 @@
     );
 
     fechaInput.addEventListener(
-      "input",
+      "change",
       actualizarFecha
     );
 
@@ -616,6 +723,11 @@
     cargoInput.addEventListener(
       "change",
       actualizarProfesor
+    );
+
+    directorInput.addEventListener(
+      "input",
+      actualizarDirector
     );
 
 
@@ -679,13 +791,16 @@
     }
 
 
+    if (params.get("director")) {
+
+      directorInput.value =
+        params.get("director");
+
+    }
+
+
     /* =========================
        QR
-
-       Acepta:
-       ?qr=...
-       o
-       ?qrUrl=...
     ========================== */
 
     const qr =
@@ -711,6 +826,7 @@
     actualizarCurso();
     actualizarFecha();
     actualizarProfesor();
+    actualizarDirector();
 
 
     /* =========================
