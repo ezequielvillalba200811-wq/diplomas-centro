@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 const PUBLIC_URL = (
@@ -18,55 +19,200 @@ const PUBLIC_URL = (
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'certificados.json');
+const FONDO_FILE = path.join(__dirname, 'fondo-certificado.png');
+
+
+/* =========================================
+   PREPARAR CARPETA DE DATOS
+========================================= */
 
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(DATA_DIR, {
+    recursive: true
+  });
 }
 
 if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-}
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
-
-function leerCertificados() {
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(data || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function guardarCertificados(data) {
   fs.writeFileSync(
     DATA_FILE,
-    JSON.stringify(data, null, 2),
+    '[]',
     'utf8'
   );
 }
 
-function escapeHtml(text = '') {
-  return String(text)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 /* =========================================
-   PÁGINA PARA CREAR CERTIFICADO
+   MIDDLEWARE
+========================================= */
+
+app.use(express.json());
+
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+
+
+/* =========================================
+   IMAGEN DEL CERTIFICADO
+========================================= */
+
+app.get('/fondo-certificado.png', (req, res) => {
+
+  if (!fs.existsSync(FONDO_FILE)) {
+    return res
+      .status(404)
+      .send('No se encontró fondo-certificado.png');
+  }
+
+  res.sendFile(FONDO_FILE);
+
+});
+
+
+/* =========================================
+   LEER CERTIFICADOS
+========================================= */
+
+function leerCertificados() {
+
+  try {
+
+    const data =
+      fs.readFileSync(
+        DATA_FILE,
+        'utf8'
+      );
+
+    return JSON.parse(
+      data || '[]'
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Error leyendo certificados:',
+      error
+    );
+
+    return [];
+
+  }
+
+}
+
+
+/* =========================================
+   GUARDAR CERTIFICADOS
+========================================= */
+
+function guardarCertificados(data) {
+
+  fs.writeFileSync(
+    DATA_FILE,
+    JSON.stringify(
+      data,
+      null,
+      2
+    ),
+    'utf8'
+  );
+
+}
+
+
+/* =========================================
+   ESCAPAR HTML
+========================================= */
+
+function escapeHtml(text = '') {
+
+  return String(text)
+
+    .replaceAll('&', '&amp;')
+
+    .replaceAll('<', '&lt;')
+
+    .replaceAll('>', '&gt;')
+
+    .replaceAll('"', '&quot;')
+
+    .replaceAll("'", '&#039;');
+
+}
+
+
+/* =========================================
+   FORMATEAR FECHA
+========================================= */
+
+function formatearFecha(fecha = '') {
+
+  const partes =
+    String(fecha).split('-');
+
+  if (partes.length !== 3) {
+    return fecha;
+  }
+
+  const anio =
+    Number(partes[0]);
+
+  const mes =
+    Number(partes[1]);
+
+  const dia =
+    Number(partes[2]);
+
+  const meses = [
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'septiembre',
+    'octubre',
+    'noviembre',
+    'diciembre'
+  ];
+
+  if (
+    !anio ||
+    !mes ||
+    !dia ||
+    mes < 1 ||
+    mes > 12
+  ) {
+    return fecha;
+  }
+
+  return (
+    dia +
+    ' de ' +
+    meses[mes - 1] +
+    ' de ' +
+    anio
+  );
+
+}
+
+
+/* =========================================
+   PÁGINA PRINCIPAL
 ========================================= */
 
 app.get('/', (req, res) => {
+
   res.send(`
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
+
   <meta charset="UTF-8" />
 
   <meta
@@ -74,7 +220,9 @@ app.get('/', (req, res) => {
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>Centro Constitución - Diplomas</title>
+  <title>
+    Centro Constitución - Diplomas
+  </title>
 
   <style>
 
@@ -83,83 +231,145 @@ app.get('/', (req, res) => {
     }
 
     body {
+
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       background: #f2f2f2;
+
       color: #111;
+
     }
 
     .contenedor {
+
       max-width: 900px;
+
       margin: 30px auto;
+
       padding: 20px;
+
     }
 
     .panel {
+
       background: white;
+
       border-radius: 14px;
+
       padding: 24px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+
+      box-shadow:
+        0 4px 18px
+        rgba(0,0,0,.12);
+
     }
 
     h1 {
+
       margin-top: 0;
+
       text-align: center;
+
     }
 
     .grid {
+
       display: grid;
-      grid-template-columns: 1fr 1fr;
+
+      grid-template-columns:
+        1fr 1fr;
+
       gap: 16px;
+
     }
 
     .campo {
+
       display: flex;
+
       flex-direction: column;
+
       gap: 6px;
+
     }
 
     label {
+
       font-weight: bold;
+
     }
 
     input,
     select {
+
+      width: 100%;
+
       padding: 12px;
+
       border-radius: 8px;
-      border: 1px solid #bbb;
+
+      border:
+        1px solid #bbb;
+
       font-size: 16px;
+
       background: white;
+
     }
 
     button {
+
       width: 100%;
+
       margin-top: 20px;
+
       padding: 14px;
+
       border: 0;
+
       border-radius: 9px;
+
       font-size: 17px;
+
       font-weight: bold;
+
       cursor: pointer;
+
       background: #111;
+
       color: white;
+
     }
 
     .ayuda {
+
       margin-top: 12px;
+
       font-size: 14px;
+
       color: #666;
+
       text-align: center;
+
     }
 
     @media (max-width: 700px) {
+
       .grid {
         grid-template-columns: 1fr;
       }
+
     }
 
   </style>
+
 </head>
+
 
 <body>
 
@@ -167,44 +377,70 @@ app.get('/', (req, res) => {
 
     <div class="panel">
 
-      <h1>Crear certificado</h1>
+      <h1>
+        Crear certificado
+      </h1>
 
-      <form method="POST" action="/crear">
+
+      <form
+        method="POST"
+        action="/crear"
+      >
 
         <div class="grid">
 
+
           <div class="campo">
-            <label>Nombre del alumno</label>
+
+            <label>
+              Nombre del alumno
+            </label>
 
             <input
               name="alumno"
               placeholder="Ej: Juan Pérez"
               required
             />
+
           </div>
 
+
           <div class="campo">
-            <label>Curso</label>
+
+            <label>
+              Curso
+            </label>
 
             <input
               name="curso"
               placeholder="Ej: Barbería Nivel Inicial"
               required
             />
+
           </div>
 
+
           <div class="campo">
-            <label>Fecha</label>
+
+            <label>
+              Fecha
+            </label>
 
             <input
+              id="fecha"
               name="fecha"
-              placeholder="Ej: 7 de septiembre de 2026"
+              type="date"
               required
             />
+
           </div>
 
+
           <div class="campo">
-            <label>Nombre del profesor/a</label>
+
+            <label>
+              Nombre del profesor/a
+            </label>
 
             <input
               name="docente"
@@ -212,12 +448,20 @@ app.get('/', (req, res) => {
               placeholder="Ej: María Acosta"
               required
             />
+
           </div>
 
-          <div class="campo">
-            <label>Profesor o Profesora</label>
 
-            <select name="cargoDocente" required>
+          <div class="campo">
+
+            <label>
+              Profesor o Profesora
+            </label>
+
+            <select
+              name="cargoDocente"
+              required
+            >
 
               <option value="Profesora">
                 Profesora
@@ -228,10 +472,15 @@ app.get('/', (req, res) => {
               </option>
 
             </select>
+
           </div>
 
+
           <div class="campo">
-            <label>Director</label>
+
+            <label>
+              Director
+            </label>
 
             <input
               name="director"
@@ -239,28 +488,75 @@ app.get('/', (req, res) => {
               placeholder="Ej: Derlis Villalba"
               required
             />
+
           </div>
+
 
         </div>
 
+
         <button type="submit">
+
           Generar certificado
+
         </button>
+
 
       </form>
 
+
       <div class="ayuda">
-        El certificado tendrá un QR único para verificar su autenticidad.
+
+        La fecha se carga automáticamente.
+        El QR se genera solo y permite verificar
+        la autenticidad del certificado.
+
       </div>
+
 
     </div>
 
   </div>
 
+
+  <script>
+
+    const fechaInput =
+      document.getElementById('fecha');
+
+    const hoy =
+      new Date();
+
+    const anio =
+      hoy.getFullYear();
+
+    const mes =
+      String(
+        hoy.getMonth() + 1
+      ).padStart(2, '0');
+
+    const dia =
+      String(
+        hoy.getDate()
+      ).padStart(2, '0');
+
+    fechaInput.value =
+      anio +
+      '-' +
+      mes +
+      '-' +
+      dia;
+
+  </script>
+
+
 </body>
+
 </html>
   `);
+
 });
+
 
 /* =========================================
    CREAR CERTIFICADO
@@ -279,53 +575,138 @@ app.post('/crear', async (req, res) => {
       director
     } = req.body;
 
-    const id = crypto.randomUUID();
+
+    if (
+      !alumno ||
+      !curso ||
+      !fecha ||
+      !docente ||
+      !cargoDocente ||
+      !director
+    ) {
+
+      return res
+        .status(400)
+        .send('Faltan datos obligatorios.');
+
+    }
+
+
+    const id =
+      crypto.randomUUID();
+
 
     const certificado = {
+
       id,
-      alumno,
-      curso,
-      fecha,
-      docente,
-      cargoDocente,
-      director,
-      creado: new Date().toISOString()
+
+      alumno: alumno.trim(),
+
+      curso: curso.trim(),
+
+      fecha: fecha.trim(),
+
+      docente: docente.trim(),
+
+      cargoDocente:
+        cargoDocente.trim(),
+
+      director:
+        director.trim(),
+
+      creado:
+        new Date().toISOString()
+
     };
 
-    const certificados = leerCertificados();
 
-    certificados.push(certificado);
+    const certificados =
+      leerCertificados();
 
-    guardarCertificados(certificados);
+
+    certificados.push(
+      certificado
+    );
+
+
+    guardarCertificados(
+      certificados
+    );
+
+
+    /* =====================================
+       QR
+    ===================================== */
 
     const urlVerificacion =
       `${PUBLIC_URL}/verificar/${id}`;
 
-    const qr = await QRCode.toDataURL(
-      urlVerificacion,
-      {
-        width: 300,
-        margin: 1
-      }
-    );
+
+    const qr =
+      await QRCode.toDataURL(
+        urlVerificacion,
+        {
+          width: 300,
+          margin: 1
+        }
+      );
+
 
     /* =====================================
-       SEPARAR DÍA, MES Y AÑO
-       Ej: 7 de septiembre de 2026
+       FECHA
     ===================================== */
 
-    const partesFecha = fecha.trim().match(
-      /^(\d{1,2})\s+de\s+(.+?)\s+(?:de|del)\s+(\d{4})$/i
-    );
+    const meses = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
+    ];
+
+
+    const partesFecha =
+      String(fecha).split('-');
+
+
+    const anioFecha =
+      Number(partesFecha[0]);
+
+
+    const mesFecha =
+      Number(partesFecha[1]);
+
+
+    const diaFecha =
+      Number(partesFecha[2]);
+
 
     const fechaDia =
-      partesFecha ? partesFecha[1] : '';
+      Number.isFinite(diaFecha)
+        ? String(diaFecha)
+        : '';
+
 
     const fechaMes =
-      partesFecha ? partesFecha[2] : '';
+      meses[mesFecha - 1] || '';
+
 
     const fechaAnio =
-      partesFecha ? partesFecha[3].slice(-2) : '';
+      Number.isFinite(anioFecha)
+        ? String(anioFecha).slice(-2)
+        : '';
+
+
+    /* =====================================
+       DIPLOMA
+    ===================================== */
 
     res.send(`
 <!DOCTYPE html>
@@ -340,7 +721,10 @@ app.post('/crear', async (req, res) => {
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>Certificado</title>
+  <title>
+    Certificado
+  </title>
+
 
   <style>
 
@@ -350,68 +734,119 @@ app.post('/crear', async (req, res) => {
 
     html,
     body {
+
       margin: 0;
+
       padding: 0;
+
       background: #ddd;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     }
 
+
     .acciones {
+
       max-width: 1120px;
+
       margin: 15px auto;
+
       display: flex;
+
       gap: 10px;
+
       padding: 0 10px;
+
     }
+
 
     .acciones button,
     .acciones a {
+
       flex: 1;
+
       padding: 12px;
+
       text-align: center;
+
       border: 0;
+
       border-radius: 8px;
+
       background: #111;
+
       color: white;
+
       text-decoration: none;
-      font-family: Arial, sans-serif;
+
+      font-family:
+        Arial,
+        sans-serif;
+
       font-weight: bold;
+
       cursor: pointer;
+
     }
+
 
     .vista {
+
       width: 100%;
+
       overflow-x: auto;
+
     }
 
+
+    /* =========================
+       CERTIFICADO
+    ========================== */
+
     .certificado {
+
       position: relative;
 
       width: 297mm;
+
       height: 210mm;
 
-      margin: 0 auto 30px;
+      margin:
+        0 auto 30px;
 
       background-color: white;
 
       background-image:
         url("/fondo-certificado.png");
 
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      background-position: center;
+      background-size:
+        100% 100%;
+
+      background-repeat:
+        no-repeat;
+
+      background-position:
+        center;
 
       overflow: hidden;
+
     }
+
 
     /* =========================
        ALUMNO
     ========================== */
 
     .alumno {
+
       position: absolute;
 
       top: 39.5%;
+
       left: 7%;
 
       width: 86%;
@@ -419,21 +854,26 @@ app.post('/crear', async (req, res) => {
       text-align: center;
 
       font-size: 10mm;
+
       font-weight: 900;
 
       text-transform: uppercase;
 
       line-height: 1.05;
+
     }
+
 
     /* =========================
        CURSO
     ========================== */
 
     .curso {
+
       position: absolute;
 
       top: 62%;
+
       left: 5%;
 
       width: 90%;
@@ -441,46 +881,65 @@ app.post('/crear', async (req, res) => {
       text-align: center;
 
       font-size: 8.5mm;
+
       font-weight: 900;
 
       text-transform: uppercase;
 
       line-height: 1.05;
+
     }
 
+
     /* =========================
-       FECHA SEPARADA
+       FECHA
     ========================== */
 
     .fecha-dia,
     .fecha-mes,
     .fecha-anio {
+
       position: absolute;
 
       top: 72.5%;
 
       font-size: 5.5mm;
+
       font-weight: 700;
 
       text-align: center;
 
       white-space: nowrap;
+
     }
+
 
     .fecha-dia {
+
       left: 40%;
+
       width: 7%;
+
     }
+
 
     .fecha-mes {
+
       left: 51%;
+
       width: 27%;
+
     }
 
+
     .fecha-anio {
+
       right: 5%;
+
       width: 6%;
+
     }
+
 
     /* =========================
        FIRMAS
@@ -488,6 +947,7 @@ app.post('/crear', async (req, res) => {
 
     .firma-docente,
     .firma-director {
+
       position: absolute;
 
       bottom: 8.5%;
@@ -495,33 +955,55 @@ app.post('/crear', async (req, res) => {
       width: 34%;
 
       text-align: center;
+
     }
+
 
     .firma-docente {
+
       left: 5%;
+
     }
+
 
     .firma-director {
+
       right: 5%;
+
     }
+
 
     .texto-firma {
+
+      display: block;
+
+      width: 100%;
+
       font-size: 5.5mm;
+
       font-weight: 700;
+
       white-space: nowrap;
+
+      text-align: center;
+
     }
 
+
     /* =========================
-       QR ARRIBA A LA DERECHA
+       QR
     ========================== */
 
     .qr {
+
       position: absolute;
 
       top: 5%;
+
       right: 4%;
 
       width: 27mm;
+
       height: 27mm;
 
       background: white;
@@ -529,66 +1011,105 @@ app.post('/crear', async (req, res) => {
       padding: 2mm;
 
       z-index: 20;
+
     }
 
+
     .qr img {
+
       display: block;
 
       width: 100%;
+
       height: 100%;
 
       object-fit: contain;
+
     }
-        }
+
+
+    /* =========================
+       IMPRESIÓN
+    ========================== */
 
     @page {
-      size: A4 landscape;
+
+      size:
+        A4 landscape;
+
       margin: 0;
+
     }
+
 
     @media print {
 
       html,
       body {
+
         width: 297mm;
+
         height: 210mm;
 
         margin: 0;
+
         padding: 0;
 
         background: white;
+
       }
+
 
       .acciones {
-        display: none !important;
+
+        display:
+          none !important;
+
       }
 
+
       .vista {
+
         width: 297mm;
+
         height: 210mm;
 
         overflow: hidden;
+
       }
 
+
       .certificado {
+
         width: 297mm;
+
         height: 210mm;
 
         margin: 0;
 
-        page-break-inside: avoid;
-        page-break-after: avoid;
+        page-break-inside:
+          avoid;
 
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        page-break-after:
+          avoid;
+
+        -webkit-print-color-adjust:
+          exact;
+
+        print-color-adjust:
+          exact;
+
       }
+
     }
 
   </style>
 
 </head>
 
+
 <body>
+
 
   <div class="acciones">
 
@@ -596,17 +1117,21 @@ app.post('/crear', async (req, res) => {
       Crear otro
     </a>
 
-    <button onclick="window.print()">
+    <button
+      onclick="window.print()"
+    >
       Imprimir / Guardar PDF
     </button>
 
   </div>
 
+
   <div class="vista">
 
     <div class="certificado">
 
-      <!-- QR ARRIBA DERECHA -->
+
+      <!-- QR -->
 
       <div class="qr">
 
@@ -617,82 +1142,137 @@ app.post('/crear', async (req, res) => {
 
       </div>
 
+
       <!-- ALUMNO -->
 
       <div class="alumno">
-        ${escapeHtml(alumno)}
+
+        ${escapeHtml(
+          certificado.alumno
+        )}
+
       </div>
+
 
       <!-- CURSO -->
 
       <div class="curso">
-        ${escapeHtml(curso)}
+
+        ${escapeHtml(
+          certificado.curso
+        )}
+
       </div>
+
 
       <!-- FECHA -->
 
       <div class="fecha-dia">
-        ${escapeHtml(fechaDia)}
+
+        ${escapeHtml(
+          fechaDia
+        )}
+
       </div>
+
 
       <div class="fecha-mes">
-        ${escapeHtml(fechaMes)}
+
+        ${escapeHtml(
+          fechaMes
+        )}
+
       </div>
+
 
       <div class="fecha-anio">
-        ${escapeHtml(fechaAnio)}
+
+        ${escapeHtml(
+          fechaAnio
+        )}
+
       </div>
 
-      <!-- DOCENTE -->
+
+      <!-- PROFESOR/A -->
 
       <div class="firma-docente">
 
         <div class="texto-firma">
-          ${escapeHtml(docente)}:
-          ${escapeHtml(cargoDocente)}
+
+          ${escapeHtml(
+            certificado.docente
+          )}
+          :
+          ${escapeHtml(
+            certificado.cargoDocente
+          )}
+
         </div>
 
       </div>
+
 
       <!-- DIRECTOR -->
 
       <div class="firma-director">
 
         <div class="texto-firma">
-          ${escapeHtml(director)}:
+
+          ${escapeHtml(
+            certificado.director
+          )}
+          :
           Director
+
         </div>
 
       </div>
 
+
     </div>
 
   </div>
+
 
 </body>
 
 </html>
     `);
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      'Error creando certificado:',
+      error
+    );
 
-    res.status(500).send(`
-      <h2>Error al generar el certificado</h2>
 
-      <p>
-        ${escapeHtml(error.message)}
-      </p>
+    res
+      .status(500)
+      .send(`
 
-      <a href="/">
-        Volver
-      </a>
-    `);
+        <h2>
+          Error al generar el certificado
+        </h2>
+
+        <p>
+          ${escapeHtml(
+            error.message
+          )}
+        </p>
+
+        <a href="/">
+          Volver
+        </a>
+
+      `);
 
   }
 
 });
+
 
 /* =========================================
    VERIFICAR CERTIFICADO
@@ -703,15 +1283,19 @@ app.get('/verificar/:id', (req, res) => {
   const certificados =
     leerCertificados();
 
+
   const certificado =
     certificados.find(
       item =>
         item.id === req.params.id
     );
 
+
   if (!certificado) {
 
-    return res.status(404).send(`
+    return res
+      .status(404)
+      .send(`
 <!DOCTYPE html>
 <html lang="es">
 
@@ -724,15 +1308,18 @@ app.get('/verificar/:id', (req, res) => {
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Certificado no encontrado</title>
+  <title>
+    Certificado no encontrado
+  </title>
 
 </head>
 
+
 <body
   style="
-    font-family: Arial;
-    text-align: center;
-    padding: 40px;
+    font-family:Arial;
+    text-align:center;
+    padding:40px;
   "
 >
 
@@ -752,6 +1339,13 @@ app.get('/verificar/:id', (req, res) => {
 
   }
 
+
+  const fechaMostrada =
+    formatearFecha(
+      certificado.fecha
+    );
+
+
   res.send(`
 <!DOCTYPE html>
 <html lang="es">
@@ -769,10 +1363,13 @@ app.get('/verificar/:id', (req, res) => {
     Verificación de certificado
   </title>
 
+
   <style>
 
     body {
+
       margin: 0;
+
       padding: 20px;
 
       font-family:
@@ -781,9 +1378,12 @@ app.get('/verificar/:id', (req, res) => {
         sans-serif;
 
       background: #f2f2f2;
+
     }
 
+
     .tarjeta {
+
       max-width: 600px;
 
       margin: 40px auto;
@@ -797,45 +1397,62 @@ app.get('/verificar/:id', (req, res) => {
       box-shadow:
         0 5px 20px
         rgba(0,0,0,.12);
+
     }
+
 
     h1 {
+
       color: #15803d;
+
     }
 
+
     .dato {
+
       margin: 15px 0;
 
       padding-bottom: 10px;
 
       border-bottom:
         1px solid #ddd;
+
     }
 
+
     .dato strong {
+
       display: block;
 
       margin-bottom: 4px;
+
     }
 
   </style>
 
 </head>
 
+
 <body>
 
   <div class="tarjeta">
+
 
     <h1>
       ✓ Certificado válido
     </h1>
 
+
     <p>
+
       Este certificado fue emitido por
+
       <strong>
         Centro Constitución
       </strong>.
+
     </p>
+
 
     <div class="dato">
 
@@ -843,9 +1460,12 @@ app.get('/verificar/:id', (req, res) => {
         Alumno
       </strong>
 
-      ${escapeHtml(certificado.alumno)}
+      ${escapeHtml(
+        certificado.alumno
+      )}
 
     </div>
+
 
     <div class="dato">
 
@@ -853,9 +1473,12 @@ app.get('/verificar/:id', (req, res) => {
         Curso
       </strong>
 
-      ${escapeHtml(certificado.curso)}
+      ${escapeHtml(
+        certificado.curso
+      )}
 
     </div>
+
 
     <div class="dato">
 
@@ -863,9 +1486,12 @@ app.get('/verificar/:id', (req, res) => {
         Fecha
       </strong>
 
-      ${escapeHtml(certificado.fecha)}
+      ${escapeHtml(
+        fechaMostrada
+      )}
 
     </div>
+
 
     <div class="dato">
 
@@ -873,11 +1499,18 @@ app.get('/verificar/:id', (req, res) => {
         Docente
       </strong>
 
-      ${escapeHtml(certificado.docente)}
+      ${escapeHtml(
+        certificado.docente
+      )}
+
       —
-      ${escapeHtml(certificado.cargoDocente)}
+
+      ${escapeHtml(
+        certificado.cargoDocente
+      )}
 
     </div>
+
 
     <div class="dato">
 
@@ -885,9 +1518,12 @@ app.get('/verificar/:id', (req, res) => {
         Director
       </strong>
 
-      ${escapeHtml(certificado.director)}
+      ${escapeHtml(
+        certificado.director
+      )}
 
     </div>
+
 
     <div class="dato">
 
@@ -895,9 +1531,12 @@ app.get('/verificar/:id', (req, res) => {
         ID de certificado
       </strong>
 
-      ${escapeHtml(certificado.id)}
+      ${escapeHtml(
+        certificado.id
+      )}
 
     </div>
+
 
   </div>
 
@@ -907,6 +1546,7 @@ app.get('/verificar/:id', (req, res) => {
   `);
 
 });
+
 
 /* =========================================
    INICIAR SERVIDOR
